@@ -509,8 +509,6 @@ function calendarHtml(list, year, month, selected) {
     </div>
     <div class="cal-legend">
       <span><i class="ev-due"></i>리뷰 마감</span>
-      <span><i class="ev-soon"></i>3일 내</span>
-      <span><i class="ev-overdue"></i>지남</span>
       <span><i class="ev-done"></i>완료</span>
     </div>
     <div class="cal-list">
