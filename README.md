@@ -16,6 +16,14 @@
 | `app.js` | 동작 |
 | `config.js` | Supabase 연결 정보 (공개용 publishable key만) |
 | `supabase.sql` | 데이터베이스 표와 보안 규칙 (Supabase SQL Editor에서 실행) |
+| `tests/logic.test.js` | 계산·표시 로직 테스트 |
+
+## 테스트
+코드를 고친 뒤 아래 명령으로 계산 로직(마감일, 체크 단계, 정렬, 카드 표시, 메모 링크)을 확인할 수 있습니다.
+
+```bash
+node tests/logic.test.js
+```
 
 ## 배포
 `main` 브랜치에 push하면 Vercel이 자동으로 배포합니다.

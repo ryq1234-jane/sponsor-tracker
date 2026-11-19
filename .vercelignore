@@ -1,3 +1,4 @@
 ﻿.env*
 .git
 supabase.sql
+tests
