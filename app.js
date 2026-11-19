@@ -163,6 +163,16 @@ const postLabel = (p, i) => p.label || `게시물 ${i + 1}`;
 
 // 신청 종류 (신청의 하위 메뉴). 저장할 땐 체크한 이름만 ["제품 제공", "유가 협찬"]
 const APPLY_TYPES = ["제품 제공", "유가 협찬"];
+const PAID_TYPE = "유가 협찬"; // 이 종류에만 금액(원) 입력칸
+
+// 300000 → "300,000"
+const formatWon = (n) => Number(n).toLocaleString("ko-KR");
+
+// "30만", "300,000원" 같은 입력에서 숫자만 뽑아 정수로 (없으면 null)
+function parseWon(text) {
+  const digits = String(text ?? "").replace(/\D/g, "").slice(0, 12);
+  return digits ? parseInt(digits, 10) : null;
+}
 
 function getApplyTypes(it) {
   return Array.isArray(it?.apply_types) ? it.apply_types.filter((t) => APPLY_TYPES.includes(t)) : [];
@@ -311,6 +321,7 @@ function cardHtml(it) {
         <li class="${applied.includes(type) ? "done" : ""}">
           <span class="post-mark" aria-label="${applied.includes(type) ? "신청함" : "신청 안 함"}"></span>
           <span class="post-name">${type}</span>
+          ${type === PAID_TYPE && applied.includes(type) && it.paid_amount ? `<span class="apply-amount">${formatWon(it.paid_amount)}원</span>` : ""}
         </li>`).join("")}
     </ul>`;
 
@@ -610,14 +621,40 @@ postsList.addEventListener("change", (e) => {
 
 // ----- 신청 종류 (창 안) -----
 const applyTypesBox = $("applyTypes");
-applyTypesBox.innerHTML = APPLY_TYPES.map((type) =>
-  `<label><input type="checkbox" data-apply-type="${type}"> ${type}</label>`).join("");
+applyTypesBox.innerHTML = APPLY_TYPES.map((type) => `
+  <span class="apply-type">
+    <label><input type="checkbox" data-apply-type="${type}"> ${type}</label>
+    ${type === PAID_TYPE ? `
+    <span class="amount-input">
+      <input type="text" id="paidAmount" inputmode="numeric" autocomplete="off" placeholder="금액" aria-label="유가 협찬 금액 (원)">
+      <span>원</span>
+    </span>` : ""}
+  </span>`).join("");
 const applyTypeInputs = () => [...applyTypesBox.querySelectorAll("[data-apply-type]")];
+const paidAmount = $("paidAmount");
+const paidCheckbox = () => applyTypeInputs().find((cb) => cb.dataset.applyType === PAID_TYPE);
 
-// 종류를 하나라도 체크하면 "신청"도 자동 체크 (해제할 땐 신청은 그대로 둠)
-applyTypesBox.addEventListener("change", (e) => {
-  if (!e.target.checked || editForm.elements.applied.checked) return;
+// 종류를 하나라도 체크하면 "협찬"(신청)도 자동 체크 (해제할 땐 그대로 둠)
+function checkApplied() {
+  if (editForm.elements.applied.checked) return;
   Object.entries(cascade("applied", true)).forEach(([k, v]) => (editForm.elements[k].checked = v));
+}
+
+applyTypesBox.addEventListener("change", (e) => {
+  if (e.target.dataset.applyType !== undefined && e.target.checked) checkApplied();
+});
+
+// 금액을 입력하면 세 자리마다 쉼표, "유가 협찬"도 자동 체크
+paidAmount.addEventListener("input", () => {
+  const fromEnd = paidAmount.value.length - paidAmount.selectionEnd; // 커서 위치 유지용
+  const n = parseWon(paidAmount.value);
+  paidAmount.value = n === null ? "" : formatWon(n);
+  const pos = Math.max(0, paidAmount.value.length - fromEnd);
+  paidAmount.setSelectionRange(pos, pos);
+  if (n !== null && !paidCheckbox().checked) {
+    paidCheckbox().checked = true;
+    checkApplied();
+  }
 });
 
 const CHECK_FIELDS = ["applied", "selected", "rejected", "received", "reviewed"];
@@ -634,6 +671,7 @@ function openEditor(item = null) {
   if (!item) editForm.elements.applied.checked = true; // 새로 추가할 땐 보통 신청한 상태
   const types = getApplyTypes(item);
   applyTypeInputs().forEach((cb) => (cb.checked = types.includes(cb.dataset.applyType)));
+  paidAmount.value = item?.paid_amount ? formatWon(item.paid_amount) : "";
 
   formPosts = getPosts(item).map((p) => ({ label: p.label || "", url: p.url || "", done: !!p.done }));
   renderPostRows();
@@ -699,6 +737,8 @@ editForm.addEventListener("submit", async (e) => {
   if (payload.review_days !== null) payload.review_days = parseInt(payload.review_days, 10) || null;
   CHECK_FIELDS.forEach((f) => (payload[f] = editForm.elements[f].checked));
   payload.apply_types = applyTypeInputs().filter((cb) => cb.checked).map((cb) => cb.dataset.applyType);
+  // 금액은 "유가 협찬"을 체크했을 때만 저장
+  payload.paid_amount = payload.apply_types.includes(PAID_TYPE) ? parseWon(paidAmount.value) : null;
   payload.posts = formPosts.map((p) => ({ label: p.label.trim(), url: p.url.trim(), done: p.done }));
   payload.review_url = null; // 리뷰 주소는 이제 게시물마다 저장
   payload.memos = formMemos.map((m) => m.trim()).filter(Boolean); // 빈 메모는 빼고 저장

@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, expandedMemos, expandedLists, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -90,6 +90,11 @@ eq("신청 버튼이 신청 종류 목록을 여닫음", /data-list-toggle="appl
 eq("신청 종류 목록은 처음엔 접혀 있음", /id="apply-ap"\s+hidden/.test(ac), true);
 eq("두 종류 모두 표시, 유가 협찬만 체크", /<li class="">\s*<span[^>]*><\/span>\s*<span class="post-name">제품 제공/.test(ac) && /<li class="done">\s*<span[^>]*><\/span>\s*<span class="post-name">유가 협찬/.test(ac), true);
 eq("신청 칩은 신청 상태면 체크 표시", /review-chip on"\s+data-list-toggle="apply-ap"/.test(ac), true);
+eq("금액 읽기: 쉼표·원 무시", t.parseWon("300,000원"), 300000);
+eq("금액 읽기: 숫자 없으면 비움", t.parseWon("금액"), null);
+eq("금액 표시: 세 자리 쉼표", t.formatWon(1500000), "1,500,000");
+eq("유가 협찬 옆에 금액 표시", /유가 협찬<\/span>\s*<span class="apply-amount">300,000원/.test(t.cardHtml({ ...three, id: "m1", apply_types: ["유가 협찬"], paid_amount: 300000 })), true);
+eq("유가 협찬 체크 안 했으면 금액 숨김", /apply-amount/.test(t.cardHtml({ ...three, id: "m2", apply_types: ["제품 제공"], paid_amount: 300000 })), false);
 eq("신청 종류 버튼 이름은 '협찬'", /aria-controls="apply-ap">협찬<\/button>/.test(ac), true);
 t.expandedLists.add("apply-ap");
 eq("펼친 신청 종류는 다시 그려도 펼친 상태", /id="apply-ap"\s+>/.test(t.cardHtml({ ...three, id: "ap" })), true);

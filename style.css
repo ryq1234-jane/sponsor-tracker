@@ -861,6 +861,33 @@ dialog::backdrop {
   border-left: 2px solid var(--line);
 }
 
+.apply-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 유가 협찬 옆 금액 입력칸 */
+.amount-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.95rem;
+}
+
+.field .amount-input input {
+  width: 130px;
+  padding: 6px 10px;
+  text-align: right;
+}
+
+/* 카드에서 펼친 신청 종류 옆 금액 */
+.apply-amount {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
 .review-block .posts-edit {
   margin-left: 8px;
   padding-left: 14px;
