@@ -376,7 +376,7 @@ function cardHtml(it) {
 
       <div class="checks-row">
         <button type="button" class="chip review-chip ${it.applied ? "on" : ""}"
-          data-list-toggle="apply-${it.id}" aria-expanded="${applyOpen}" aria-controls="apply-${it.id}">신청</button>
+          data-list-toggle="apply-${it.id}" aria-expanded="${applyOpen}" aria-controls="apply-${it.id}">협찬</button>
         ${step("selected", "선정")}
         ${step("received", "수령")}
         <button type="button" class="chip review-chip ${it.reviewed ? "on" : ""}"
