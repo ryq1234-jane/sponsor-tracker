@@ -393,25 +393,14 @@ button {
   font-weight: 700;
 }
 
-/* 카드 안의 체크 버튼 */
+/* 카드 안의 진행 표시 (누를 수 없음, 체크는 수정 창에서) */
 .checks-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
 }
 
-.chip-check {
-  position: relative;
-  cursor: pointer;
-}
-
-.chip-check input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.chip-check span {
+.chip {
   display: block;
   padding: 9px 0;
   font-size: 0.85rem;
@@ -421,68 +410,97 @@ button {
   background: #f6f7f9;
   border: 1px solid var(--line);
   border-radius: 8px;
-  transition: background 0.15s;
 }
 
-.chip-check span::before {
+.chip::before {
   content: "○ ";
 }
 
-.chip-check input:checked + span {
+.chip.on {
   color: var(--done);
   background: var(--done-soft);
   border-color: #b7e4c0;
 }
 
-.chip-check input:checked + span::before {
+.chip.on::before {
   content: "✓ ";
 }
 
-.chip-check input:focus-visible + span {
+/* "리뷰" 버튼만 누를 수 있음 → 아래로 게시물 목록 펼치기 */
+.review-chip {
+  width: 100%;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.review-chip::after {
+  content: " ▾";
+}
+
+.review-chip[aria-expanded="true"]::after {
+  content: " ▴";
+}
+
+.review-chip:focus-visible {
   outline: 2px solid var(--primary);
 }
 
-/* 카드 안 게시물 체크리스트 */
+/* 리뷰 아래로 펼쳐지는 게시물 목록 */
 .post-list {
+  position: relative;
   display: grid;
   gap: 6px;
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   padding: 10px 12px;
   list-style: none;
   background: #f9fafb;
+  border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+/* 위쪽 작은 화살표가 "리뷰" 버튼(4번째 칸)을 가리키게 */
+.post-list::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: calc(12.5% - 7px);
+  width: 12px;
+  height: 12px;
+  background: #f9fafb;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  transform: rotate(45deg);
 }
 
 .post-list li {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-}
-
-.post-check {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
   font-size: 0.9rem;
-  cursor: pointer;
 }
 
-.post-check input {
+.post-mark {
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  accent-color: var(--done);
+  border: 2px solid #c4c8cf;
+  border-radius: 5px;
 }
 
-.post-check span {
+.post-list li.done .post-mark {
+  background: var(--done) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3 3 7-7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
+  border-color: var(--done);
+}
+
+.post-name {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.post-check input:checked + span {
+.post-list li.done .post-name {
   color: var(--muted);
   text-decoration: line-through;
 }
@@ -674,16 +692,20 @@ dialog::backdrop {
 }
 
 .checks {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  padding: 10px 12px;
+  gap: 12px;
+  padding: 10px 12px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
 }
 
 .checks legend {
   padding: 0 4px;
+}
+
+.checks-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
 }
 
 .checks label {
@@ -695,10 +717,30 @@ dialog::backdrop {
   cursor: pointer;
 }
 
-.checks input {
+.checks label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--primary);
+}
+
+/* 리뷰 작성 + 그 아래 게시물 체크리스트 (들여쓰기 + 왼쪽 선으로 "하위 메뉴" 표시) */
+.review-block {
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.review-block .posts-head {
+  margin-bottom: 8px;
+}
+
+.review-block small {
+  color: var(--muted);
+}
+
+.review-block .posts-edit {
+  margin-left: 8px;
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
 }
 
 .confirm {

@@ -221,21 +221,6 @@ async function loadItems() {
   render();
 }
 
-// 체크박스를 바로 눌렀을 때: 화면 먼저 바꾸고 → 저장 (실패하면 되돌림)
-async function updateChecks(id, changes) {
-  const item = items.find((it) => it.id === id);
-  const before = { ...item };
-  Object.assign(item, changes);
-  render();
-
-  const { error } = await db.from("sponsorships").update(changes).eq("id", id);
-  if (error) {
-    Object.assign(item, before);
-    render();
-    showToast("저장하지 못했어요: " + friendlyError(error));
-  }
-}
-
 // ===== 7. 화면 그리기 =====
 // 정렬: 진행 중인 것 먼저 → 리뷰 마감일 가까운 순 (마감일 없는 건 뒤로) → 최근 추가 순
 function sortItems(arr) {
@@ -278,25 +263,20 @@ function cardHtml(it) {
   const recruit = safeUrl(it.recruit_url);
   const posts = getPosts(it);
   const postsDone = posts.filter((p) => p.done).length;
-  // 게시물이 하나뿐이면 체크리스트 없이 "내 리뷰" 링크만
-  const review = posts.length === 1 ? safeUrl(posts[0].url) : null;
 
-  const check = (field, label) => `
-    <label class="chip-check">
-      <input type="checkbox" data-id="${it.id}" data-field="${field}" ${it[field] ? "checked" : ""}>
-      <span>${label}</span>
-    </label>`;
+  // 카드의 진행 상황은 "표시"만 (누를 수 없음). 체크는 수정 창에서.
+  const step = (field, label) => `<span class="chip ${it[field] ? "on" : ""}">${label}</span>`;
 
-  const postList = posts.length < 2 ? "" : `
-    <ul class="post-list">
+  // "리뷰" 버튼을 누르면 아래로 펼쳐지는 게시물 목록 (표시만)
+  const postsOpen = expandedPosts.has(it.id);
+  const postList = `
+    <ul class="post-list" id="posts-${it.id}" ${postsOpen ? "" : "hidden"}>
       ${posts.map((p, i) => {
         const url = safeUrl(p.url);
         return `
-        <li>
-          <label class="post-check">
-            <input type="checkbox" data-id="${it.id}" data-post="${i}" ${p.done ? "checked" : ""}>
-            <span>${esc(postLabel(p, i))}</span>
-          </label>
+        <li class="${p.done ? "done" : ""}">
+          <span class="post-mark" aria-label="${p.done ? "완료" : "미완료"}"></span>
+          <span class="post-name">${esc(postLabel(p, i))}</span>
           ${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">보기 ↗</a>` : ""}
         </li>`;
       }).join("")}
@@ -325,10 +305,11 @@ function cardHtml(it) {
       </dl>` : ""}
 
       <div class="checks-row">
-        ${check("applied", "신청")}
-        ${check("selected", "선정")}
-        ${check("received", "수령")}
-        ${check("reviewed", posts.length > 1 ? `리뷰 ${postsDone}/${posts.length}` : "리뷰")}
+        ${step("applied", "신청")}
+        ${step("selected", "선정")}
+        ${step("received", "수령")}
+        <button type="button" class="chip review-chip ${it.reviewed ? "on" : ""}"
+          data-posts-toggle="${it.id}" aria-expanded="${postsOpen}" aria-controls="posts-${it.id}">리뷰 ${postsDone}/${posts.length}</button>
       </div>
 
       ${postList}
@@ -342,7 +323,6 @@ function cardHtml(it) {
       <div class="card-foot">
         <div class="links">
           ${recruit ? `<a href="${esc(recruit)}" target="_blank" rel="noopener noreferrer">모집 글 ↗</a>` : ""}
-          ${review ? `<a href="${esc(review)}" target="_blank" rel="noopener noreferrer">내 리뷰 ↗</a>` : ""}
         </div>
         <button type="button" class="btn btn-ghost btn-small" data-edit="${it.id}">수정</button>
       </div>
@@ -385,6 +365,7 @@ function render() {
 // 메모가 세 줄을 넘을 때만 "더보기" 버튼 보이기
 // (화면에 그려진 뒤에야 실제 높이를 알 수 있어서 render 다음에 확인)
 const expandedMemos = new Set(); // 펼쳐 둔 메모의 항목 id
+const expandedPosts = new Set(); // 게시물 목록을 펼쳐 둔 항목 id
 
 function updateMemoToggles() {
   list.querySelectorAll(".memo").forEach((memo) => {
@@ -396,50 +377,19 @@ function updateMemoToggles() {
 
 window.addEventListener("resize", updateMemoToggles); // 화면 폭이 바뀌면 줄 수도 바뀜
 
-// 게시물 체크를 바꿨을 때: 모두 끝났으면 "리뷰" 완료, 하나라도 남았으면 미완료
-function postChanges(item, posts) {
-  const changes = { posts };
-  const allDone = posts.every((p) => p.done);
-  if (allDone !== !!item.reviewed) Object.assign(changes, cascade("reviewed", allDone));
-  return changes;
-}
-
-// 카드 안의 체크박스 / 수정 버튼 (목록 전체에 한 번만 연결)
-list.addEventListener("change", (e) => {
-  const postBox = e.target.closest("input[data-post]");
-  if (postBox) {
-    const item = items.find((it) => it.id === postBox.dataset.id);
-    const posts = getPosts(item).map((p) => ({ ...p }));
-    posts[postBox.dataset.post].done = postBox.checked;
-    updateChecks(item.id, postChanges(item, posts));
+// 카드 안의 리뷰(게시물 목록)·메모 펼치기, 수정 버튼 (목록 전체에 한 번만 연결)
+list.addEventListener("click", (e) => {
+  const postsToggle = e.target.closest("[data-posts-toggle]");
+  if (postsToggle) {
+    const id = postsToggle.dataset.postsToggle;
+    const open = !expandedPosts.has(id);
+    if (open) expandedPosts.add(id);
+    else expandedPosts.delete(id);
+    postsToggle.setAttribute("aria-expanded", open);
+    $(`posts-${id}`).hidden = !open;
     return;
   }
 
-  const box = e.target.closest("input[data-field]");
-  if (!box) return;
-  const item = items.find((it) => it.id === box.dataset.id);
-  const changes = cascade(box.dataset.field, box.checked);
-
-  // "리뷰" 완료가 바뀌면 게시물 체크도 모두 같이 (예: 리뷰 체크 → 게시물 전부 완료)
-  if ("reviewed" in changes) {
-    changes.posts = getPosts(item).map((p) => ({ ...p, done: changes.reviewed }));
-  }
-
-  // 택배 수령을 체크하면: 수령일을 오늘로, 리뷰 마감일도 자동 계산 (이미 있으면 그대로)
-  if (changes.received && !item.received) {
-    const receivedDate = item.received_date || todayStr();
-    changes.received_date = receivedDate;
-    if (!item.review_due) {
-      const due = calcDue(receivedDate, item.review_days);
-      if (due) changes.review_due = due;
-    }
-  }
-
-  updateChecks(item.id, changes);
-  if (changes.review_due) showToast(`리뷰 마감일을 ${formatDate(changes.review_due)}로 정했어요.`);
-});
-
-list.addEventListener("click", (e) => {
   const toggle = e.target.closest("[data-memo-toggle]");
   if (toggle) {
     const id = toggle.dataset.memoToggle;
@@ -481,6 +431,13 @@ function renderPostRows() {
   $("postCount").textContent = formPosts.length;
   $("postMinus").disabled = formPosts.length <= 1;
   $("postPlus").disabled = formPosts.length >= MAX_POSTS;
+  updateReviewProgress();
+}
+
+// "리뷰 작성" 옆에 (완료 수/전체) 표시
+function updateReviewProgress() {
+  const done = formPosts.filter((p) => p.done).length;
+  $("reviewProgress").textContent = `(${done}/${formPosts.length})`;
 }
 
 // 게시물이 모두 끝났는지에 맞춰 위쪽 "리뷰 작성" 체크(와 앞 단계들)를 맞춤
@@ -509,6 +466,7 @@ postsList.addEventListener("input", (e) => {
 postsList.addEventListener("change", (e) => {
   if (e.target.type !== "checkbox") return;
   formPosts[e.target.dataset.i].done = e.target.checked;
+  updateReviewProgress();
   syncReviewedFromPosts();
 });
 const CHECK_FIELDS = ["applied", "selected", "rejected", "received", "reviewed"];

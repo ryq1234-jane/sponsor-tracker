@@ -86,11 +86,25 @@
 
         <fieldset class="field checks">
           <legend>진행 체크</legend>
-          <label><input type="checkbox" name="applied"> 신청</label>
-          <label><input type="checkbox" name="selected"> 선정</label>
-          <label><input type="checkbox" name="rejected"> 미선정</label>
-          <label><input type="checkbox" name="received"> 택배 수령</label>
-          <label><input type="checkbox" name="reviewed"> 리뷰 작성</label>
+          <div class="checks-line">
+            <label><input type="checkbox" name="applied"> 신청</label>
+            <label><input type="checkbox" name="selected"> 선정</label>
+            <label><input type="checkbox" name="rejected"> 미선정</label>
+            <label><input type="checkbox" name="received"> 택배 수령</label>
+          </div>
+
+          <!-- 리뷰 작성 + 그 아래 게시물 체크리스트 -->
+          <div class="review-block">
+            <div class="posts-head">
+              <label><input type="checkbox" name="reviewed"> 리뷰 작성 <small id="reviewProgress"></small></label>
+              <div class="stepper" title="게시물 개수">
+                <button type="button" id="postMinus" aria-label="게시물 줄이기">−</button>
+                <output id="postCount">1</output>
+                <button type="button" id="postPlus" aria-label="게시물 늘리기">+</button>
+              </div>
+            </div>
+            <div id="postsList" class="posts-edit"></div> <!-- script에서 채움 -->
+          </div>
         </fieldset>
 
         <div class="grid-2">
@@ -114,17 +128,6 @@
           <span>모집 글 URL</span>
           <input type="url" name="recruit_url" placeholder="https://">
         </label>
-        <div class="field">
-          <div class="posts-head">
-            <span>게시물 체크리스트</span>
-            <div class="stepper">
-              <button type="button" id="postMinus" aria-label="게시물 줄이기">−</button>
-              <output id="postCount">1</output>
-              <button type="button" id="postPlus" aria-label="게시물 늘리기">+</button>
-            </div>
-          </div>
-          <div id="postsList" class="posts-edit"></div> <!-- script에서 채움 -->
-        </div>
 
         <label class="field">
           <span>메모</span>
