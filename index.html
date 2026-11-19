@@ -114,10 +114,17 @@
           <span>모집 글 URL</span>
           <input type="url" name="recruit_url" placeholder="https://">
         </label>
-        <label class="field">
-          <span>작성한 리뷰 URL</span>
-          <input type="url" name="review_url" placeholder="https://">
-        </label>
+        <div class="field">
+          <div class="posts-head">
+            <span>게시물 체크리스트</span>
+            <div class="stepper">
+              <button type="button" id="postMinus" aria-label="게시물 줄이기">−</button>
+              <output id="postCount">1</output>
+              <button type="button" id="postPlus" aria-label="게시물 늘리기">+</button>
+            </div>
+          </div>
+          <div id="postsList" class="posts-edit"></div> <!-- script에서 채움 -->
+        </div>
 
         <label class="field">
           <span>메모</span>

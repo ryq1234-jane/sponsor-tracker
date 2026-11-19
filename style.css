@@ -442,14 +442,157 @@ button {
   outline: 2px solid var(--primary);
 }
 
-.memo {
-  margin: 12px 0 0;
-  padding: 8px 10px;
-  font-size: 0.85rem;
-  color: #4b5563;
+/* 카드 안 게시물 체크리스트 */
+.post-list {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  list-style: none;
   background: #f9fafb;
   border-radius: 8px;
+}
+
+.post-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.post-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.post-check input {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--done);
+}
+
+.post-check span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-check input:checked + span {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.post-list a {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+/* 메모: 처음엔 세 줄까지만 */
+.memo-wrap {
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.memo {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #4b5563;
   white-space: pre-line; /* 메모의 줄바꿈 그대로 표시 */
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+.memo.expanded {
+  display: block;
+}
+
+.memo-toggle {
+  margin-top: 2px;
+  padding: 2px 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* 추가/수정 창의 게시물 목록 */
+.posts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stepper button {
+  width: 36px;
+  height: 32px;
+  font-size: 1.1rem;
+  color: var(--text);
+  background: #f6f7f9;
+  border: none;
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  color: #c4c8cf;
+  cursor: default;
+}
+
+.stepper output {
+  min-width: 32px;
+  text-align: center;
+}
+
+.posts-edit {
+  display: grid;
+  gap: 8px;
+}
+
+.post-row {
+  display: grid;
+  grid-template-columns: auto 1fr 1.4fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--done);
+}
+
+@media (max-width: 560px) {
+  /* 좁은 화면: [체크][이름] 아래 줄에 [주소] */
+  .post-row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .post-row input[type="url"] {
+    grid-column: 2;
+  }
 }
 
 .card-foot {

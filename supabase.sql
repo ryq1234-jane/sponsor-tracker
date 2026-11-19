@@ -21,7 +21,8 @@ create table if not exists public.sponsorships (
   review_due   date,                   -- 리뷰 마감일
 
   recruit_url  text,                   -- 모집 글 주소
-  review_url   text,                   -- 작성한 리뷰 주소
+  review_url   text,                   -- (예전 버전) 작성한 리뷰 주소 — 지금은 posts 사용
+  posts        jsonb not null default '[]'::jsonb,  -- 게시물 체크리스트 [{label, url, done}, ...]
   memo         text,
 
   created_at   timestamptz not null default now(),
@@ -39,6 +40,7 @@ end $$;
 
 alter table public.sponsorships add column if not exists received_date date;
 alter table public.sponsorships add column if not exists review_days integer;
+alter table public.sponsorships add column if not exists posts jsonb not null default '[]'::jsonb;
 alter table public.sponsorships drop column if exists visit_date;
 alter table public.sponsorships drop column if exists visit_time;
 
