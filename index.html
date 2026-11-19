@@ -44,7 +44,6 @@
           </svg>
         </button>
         <button type="button" class="btn btn-primary" id="addButton">+ 새 협찬</button>
-        <button type="button" class="btn btn-ghost logout-top" data-logout>로그아웃</button>
       </div>
     </header>
 
@@ -52,6 +51,9 @@
       <!-- PC: 왼쪽 일정 달력 (script에서 채움) -->
       <aside class="side" aria-label="일정 달력">
         <div class="calendar cal-card" id="calendarSide"></div>
+        <div class="logout-side">
+          <button type="button" class="btn btn-ghost" data-logout>로그아웃</button>
+        </div>
       </aside>
 
       <div class="main-col">
@@ -70,7 +72,7 @@
         <main class="list" id="list"></main>
         <p class="empty" id="emptyMessage" hidden></p>
 
-        <!-- 휴대폰: 로그아웃은 목록 맨 아래 가운데 (PC는 위쪽 오른쪽) -->
+        <!-- 휴대폰: 로그아웃은 목록 맨 아래 가운데 (PC는 왼쪽 달력 밑) -->
         <div class="logout-bottom">
           <button type="button" class="btn btn-ghost" data-logout>로그아웃</button>
         </div>
