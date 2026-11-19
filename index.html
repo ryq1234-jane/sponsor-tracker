@@ -86,10 +86,16 @@
 
         <fieldset class="field checks">
           <legend>진행 체크</legend>
-          <!-- 신청 + 그 아래 신청 종류 (제품 제공 / 유가 협찬) -->
+          <!-- 협찬 + 그 아래 하위 메뉴: 경로(직접 신청 / 제안 받음), 종류(제품 제공 / 유가 협찬) -->
           <div class="apply-block">
             <label><input type="checkbox" name="applied"> 협찬</label>
-            <div id="applyTypes" class="sub-checks"></div> <!-- script에서 채움 -->
+            <div class="sub-menu">
+              <div class="sub-checks">
+                <label><input type="radio" name="origin" value="applied"> 직접 신청</label>
+                <label><input type="radio" name="origin" value="offered"> 제안 받음</label>
+              </div>
+              <div id="applyTypes" class="sub-checks"></div> <!-- script에서 채움 -->
+            </div>
           </div>
 
           <div class="checks-line">

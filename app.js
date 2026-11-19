@@ -165,6 +165,9 @@ const postLabel = (p, i) => p.label || `게시물 ${i + 1}`;
 const APPLY_TYPES = ["제품 제공", "유가 협찬"];
 const PAID_TYPE = "유가 협찬"; // 이 종류에만 금액(원) 입력칸
 
+// 협찬 경로: 내가 신청한 건지, 업체에서 제안받은 건지 (DB에는 영어 값으로 저장)
+const ORIGINS = { applied: "직접 신청", offered: "제안 받음" };
+
 // 300000 → "300,000"
 const formatWon = (n) => Number(n).toLocaleString("ko-KR");
 
@@ -370,6 +373,7 @@ function cardHtml(it) {
       <div class="card-top">
         <div class="tags">
           <span class="stage">${STAGES[stage].label}</span>
+          ${ORIGINS[it.origin] ? `<span class="origin origin-${it.origin}">${ORIGINS[it.origin]}</span>` : ""}
           ${it.platform ? `<span class="platform">${esc(it.platform)}</span>` : ""}
         </div>
         ${dueBadge(it)}
@@ -644,6 +648,10 @@ applyTypesBox.addEventListener("change", (e) => {
   if (e.target.dataset.applyType !== undefined && e.target.checked) checkApplied();
 });
 
+// 경로(직접 신청 / 제안 받음)를 고르면 "협찬"도 자동 체크
+const originInputs = () => [...editForm.querySelectorAll('input[name="origin"]')];
+originInputs().forEach((r) => r.addEventListener("change", checkApplied));
+
 // 금액을 입력하면 세 자리마다 쉼표, "유가 협찬"도 자동 체크
 paidAmount.addEventListener("input", () => {
   const fromEnd = paidAmount.value.length - paidAmount.selectionEnd; // 커서 위치 유지용
@@ -672,6 +680,7 @@ function openEditor(item = null) {
   const types = getApplyTypes(item);
   applyTypeInputs().forEach((cb) => (cb.checked = types.includes(cb.dataset.applyType)));
   paidAmount.value = item?.paid_amount ? formatWon(item.paid_amount) : "";
+  originInputs().forEach((r) => (r.checked = r.value === item?.origin));
 
   formPosts = getPosts(item).map((p) => ({ label: p.label || "", url: p.url || "", done: !!p.done }));
   renderPostRows();
@@ -693,7 +702,7 @@ CHECK_FIELDS.forEach((f) => {
     const changes = cascade(f, e.target.checked);
     Object.entries(changes).forEach(([k, v]) => (editForm.elements[k].checked = v));
     // "신청"을 해제하면 신청 종류도 모두 해제
-    if (changes.applied === false) applyTypeInputs().forEach((cb) => (cb.checked = false));
+    if (changes.applied === false) [...applyTypeInputs(), ...originInputs()].forEach((cb) => (cb.checked = false));
     // "리뷰 작성"이 바뀌면 게시물 체크도 모두 같이
     if ("reviewed" in changes) {
       formPosts.forEach((p) => (p.done = changes.reviewed));
@@ -737,6 +746,7 @@ editForm.addEventListener("submit", async (e) => {
   if (payload.review_days !== null) payload.review_days = parseInt(payload.review_days, 10) || null;
   CHECK_FIELDS.forEach((f) => (payload[f] = editForm.elements[f].checked));
   payload.apply_types = applyTypeInputs().filter((cb) => cb.checked).map((cb) => cb.dataset.applyType);
+  payload.origin = originInputs().find((r) => r.checked)?.value ?? null;
   // 금액은 "유가 협찬"을 체크했을 때만 저장
   payload.paid_amount = payload.apply_types.includes(PAID_TYPE) ? parseWon(paidAmount.value) : null;
   payload.posts = formPosts.map((p) => ({ label: p.label.trim(), url: p.url.trim(), done: p.done }));

@@ -332,6 +332,7 @@ button {
 
 .stage,
 .platform,
+.origin,
 .dday {
   padding: 3px 8px;
   font-size: 0.75rem;
@@ -350,6 +351,18 @@ button {
 .platform {
   color: var(--muted);
   background: #f1f2f4;
+}
+
+/* 경로 태그: 직접 신청(회색 테두리) / 제안 받음(파란 테두리) */
+.origin {
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.origin-offered {
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .dday {
@@ -827,7 +840,8 @@ dialog::backdrop {
   cursor: pointer;
 }
 
-.checks label input[type="checkbox"] {
+.checks label input[type="checkbox"],
+.checks label input[type="radio"] {
   width: 18px;
   height: 18px;
   accent-color: var(--primary);
@@ -852,13 +866,24 @@ dialog::backdrop {
   margin-bottom: 10px;
 }
 
+.sub-menu {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0 8px;
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
+}
+
 .sub-checks {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 14px;
-  margin: 8px 0 0 8px;
-  padding-left: 14px;
-  border-left: 2px solid var(--line);
+}
+
+/* 첫 줄(경로)과 둘째 줄(종류) 사이 옅은 구분선 */
+.sub-checks + .sub-checks {
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
 }
 
 .apply-type {
