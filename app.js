@@ -140,6 +140,13 @@ function getPosts(it) {
 
 const postLabel = (p, i) => p.label || `게시물 ${i + 1}`;
 
+// 메모 여러 개 ["...", "..."]
+// 예전에 만든 항목은 메모 칸(memo) 하나를 첫 메모로 보여줌
+function getMemos(it) {
+  if (Array.isArray(it?.memos) && it.memos.length) return it.memos;
+  return it?.memo ? [it.memo] : [];
+}
+
 // 체크 하나를 바꿀 때 앞뒤 단계도 자연스럽게 맞춰줌
 // 예) "수령"을 체크하면 신청·선정도 자동 체크 / "미선정"을 체크하면 선정 이후 체크는 해제
 const FLOW = ["applied", "selected", "received", "reviewed"];
@@ -282,7 +289,30 @@ function cardHtml(it) {
       }).join("")}
     </ul>`;
 
-  const memoOpen = expandedMemos.has(it.id);
+  // 메모: 좌우로 밀어서 넘기는 슬라이드 (메모가 2개 이상이면 아래에 ‹ ● ○ › 표시)
+  const memos = getMemos(it);
+  const memoIdx = Math.min(memoIndex.get(it.id) || 0, Math.max(memos.length - 1, 0));
+  const memoBox = !memos.length ? "" : `
+      <div class="memos">
+        <div class="memo-track" data-track="${it.id}">
+          ${memos.map((m, i) => {
+            const key = `${it.id}:${i}`;
+            const open = expandedMemos.has(key);
+            return `
+            <div class="memo-slide">
+              <p class="memo ${open ? "expanded" : ""}">${esc(m)}</p>
+              <button type="button" class="memo-toggle" data-memo-toggle="${key}" hidden>${open ? "접기" : "더보기"}</button>
+            </div>`;
+          }).join("")}
+        </div>
+        ${memos.length < 2 ? "" : `
+        <div class="memo-nav">
+          <button type="button" data-memo-step="-1" data-id="${it.id}" aria-label="이전 메모">‹</button>
+          <span class="memo-dots">${memos.map((_, i) => `<i class="${i === memoIdx ? "on" : ""}"></i>`).join("")}</span>
+          <span class="memo-count">${memoIdx + 1}/${memos.length}</span>
+          <button type="button" data-memo-step="1" data-id="${it.id}" aria-label="다음 메모">›</button>
+        </div>`}
+      </div>`;
 
   return `
     <article class="card stage-${stage} ${urgency}">
@@ -314,11 +344,7 @@ function cardHtml(it) {
 
       ${postList}
 
-      ${it.memo ? `
-      <div class="memo-wrap">
-        <p class="memo ${memoOpen ? "expanded" : ""}">${esc(it.memo)}</p>
-        <button type="button" class="memo-toggle" data-memo-toggle="${it.id}" hidden>${memoOpen ? "접기" : "더보기"}</button>
-      </div>` : ""}
+      ${memoBox}
 
       <div class="card-foot">
         <div class="links">
@@ -350,6 +376,7 @@ function render() {
 
   const shown = sortItems(items.filter(matchesFilter));
   list.innerHTML = shown.map(cardHtml).join("");
+  restoreMemoSlides();
   updateMemoToggles();
 
   emptyMessage.hidden = shown.length > 0;
@@ -364,8 +391,34 @@ function render() {
 
 // 메모가 세 줄을 넘을 때만 "더보기" 버튼 보이기
 // (화면에 그려진 뒤에야 실제 높이를 알 수 있어서 render 다음에 확인)
-const expandedMemos = new Set(); // 펼쳐 둔 메모의 항목 id
+const expandedMemos = new Set(); // 펼쳐 둔 메모 ("항목id:메모번호")
 const expandedPosts = new Set(); // 게시물 목록을 펼쳐 둔 항목 id
+const memoIndex = new Map(); // 항목 id → 지금 보고 있는 메모 번호
+
+// ----- 메모 슬라이드 -----
+// 다시 그려도 보던 메모 그대로 보이게 위치 복원
+function restoreMemoSlides() {
+  list.querySelectorAll(".memo-track").forEach((track) => {
+    const idx = memoIndex.get(track.dataset.track) || 0;
+    track.scrollLeft = idx * track.clientWidth;
+  });
+}
+
+// 지금 몇 번째 메모인지 아래 점/숫자에 표시
+function updateMemoNav(track) {
+  const nav = track.nextElementSibling;
+  if (!nav) return; // 메모가 1개면 표시 없음
+  const total = track.children.length;
+  const idx = Math.min(total - 1, Math.round(track.scrollLeft / Math.max(track.clientWidth, 1)));
+  memoIndex.set(track.dataset.track, idx);
+  nav.querySelectorAll(".memo-dots i").forEach((dot, i) => dot.classList.toggle("on", i === idx));
+  nav.querySelector(".memo-count").textContent = `${idx + 1}/${total}`;
+}
+
+// 손가락/트랙패드로 밀었을 때 (scroll은 위로 전달되지 않아서 capture로 받음)
+list.addEventListener("scroll", (e) => {
+  if (e.target.classList?.contains("memo-track")) updateMemoNav(e.target);
+}, true);
 
 function updateMemoToggles() {
   list.querySelectorAll(".memo").forEach((memo) => {
@@ -375,7 +428,11 @@ function updateMemoToggles() {
   });
 }
 
-window.addEventListener("resize", updateMemoToggles); // 화면 폭이 바뀌면 줄 수도 바뀜
+// 화면 폭이 바뀌면 메모 줄 수와 슬라이드 폭도 바뀜
+window.addEventListener("resize", () => {
+  restoreMemoSlides();
+  updateMemoToggles();
+});
 
 // 카드 안의 리뷰(게시물 목록)·메모 펼치기, 수정 버튼 (목록 전체에 한 번만 연결)
 list.addEventListener("click", (e) => {
@@ -387,6 +444,14 @@ list.addEventListener("click", (e) => {
     else expandedPosts.delete(id);
     postsToggle.setAttribute("aria-expanded", open);
     $(`posts-${id}`).hidden = !open;
+    return;
+  }
+
+  // ‹ › 버튼으로 메모 넘기기
+  const stepBtn = e.target.closest("[data-memo-step]");
+  if (stepBtn) {
+    const track = list.querySelector(`[data-track="${stepBtn.dataset.id}"]`);
+    track.scrollBy({ left: Number(stepBtn.dataset.memoStep) * track.clientWidth, behavior: "smooth" });
     return;
   }
 
@@ -414,8 +479,39 @@ filterButtons.forEach((btn) => {
 });
 
 // ===== 8. 추가 / 수정 창 =====
-const TEXT_FIELDS = ["title", "platform", "offer", "received_date", "review_days", "review_due", "recruit_url", "memo"];
+const TEXT_FIELDS = ["title", "platform", "offer", "received_date", "review_days", "review_due", "recruit_url"];
 const MAX_POSTS = 10;
+const MAX_MEMOS = 20;
+
+// ----- 메모 여러 개 (창 안) -----
+const memosList = $("memosList");
+let formMemos = []; // 창에서 편집 중인 메모들
+
+function renderMemoRows() {
+  memosList.innerHTML = formMemos.map((m, i) => `
+    <div class="memo-row">
+      <textarea data-m="${i}" rows="3" placeholder="${i === 0 ? "필수 키워드·해시태그, 사진/영상 개수, 송장번호 등" : `메모 ${i + 1}`}">${esc(m)}</textarea>
+      ${formMemos.length > 1 ? `<button type="button" class="icon-btn" data-memo-del="${i}" aria-label="메모 ${i + 1} 삭제">✕</button>` : ""}
+    </div>`).join("");
+  $("memoAdd").disabled = formMemos.length >= MAX_MEMOS;
+}
+
+$("memoAdd").addEventListener("click", () => {
+  formMemos.push("");
+  renderMemoRows();
+  memosList.querySelector(`[data-m="${formMemos.length - 1}"]`).focus(); // 새 메모 칸으로 바로 이동
+});
+
+memosList.addEventListener("input", (e) => {
+  if (e.target.dataset.m !== undefined) formMemos[e.target.dataset.m] = e.target.value;
+});
+
+memosList.addEventListener("click", (e) => {
+  const del = e.target.closest("[data-memo-del]");
+  if (!del) return;
+  formMemos.splice(Number(del.dataset.memoDel), 1);
+  renderMemoRows();
+});
 
 // ----- 게시물 체크리스트 (창 안) -----
 const postsList = $("postsList");
@@ -485,6 +581,10 @@ function openEditor(item = null) {
   formPosts = getPosts(item).map((p) => ({ label: p.label || "", url: p.url || "", done: !!p.done }));
   renderPostRows();
 
+  formMemos = [...getMemos(item)];
+  if (!formMemos.length) formMemos = [""]; // 빈 메모 칸 하나는 항상
+  renderMemoRows();
+
   editDialog.showModal();
 }
 
@@ -541,6 +641,8 @@ editForm.addEventListener("submit", async (e) => {
   CHECK_FIELDS.forEach((f) => (payload[f] = editForm.elements[f].checked));
   payload.posts = formPosts.map((p) => ({ label: p.label.trim(), url: p.url.trim(), done: p.done }));
   payload.review_url = null; // 리뷰 주소는 이제 게시물마다 저장
+  payload.memos = formMemos.map((m) => m.trim()).filter(Boolean); // 빈 메모는 빼고 저장
+  payload.memo = null; // 메모는 이제 memos에 여러 개로 저장
 
   saveButton.disabled = true;
   const query = editingId

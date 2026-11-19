@@ -129,10 +129,13 @@
           <input type="url" name="recruit_url" placeholder="https://">
         </label>
 
-        <label class="field">
-          <span>메모</span>
-          <textarea name="memo" rows="3" placeholder="필수 키워드·해시태그, 사진/영상 개수, 송장번호 등"></textarea>
-        </label>
+        <div class="field">
+          <div class="posts-head">
+            <span>메모</span>
+            <button type="button" class="btn btn-ghost btn-small" id="memoAdd">+ 메모 추가</button>
+          </div>
+          <div id="memosList" class="memos-edit"></div> <!-- script에서 채움 -->
+        </div>
 
         <p id="editMessage" class="message" hidden></p>
       </div>

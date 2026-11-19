@@ -513,12 +513,98 @@ button {
   text-decoration: none;
 }
 
-/* 메모: 처음엔 세 줄까지만 */
-.memo-wrap {
+/* 메모 여러 개: 좌우로 밀어서 넘기기 */
+.memos {
   margin: 12px 0 0;
-  padding: 8px 10px;
   background: #f9fafb;
   border-radius: 8px;
+  overflow: hidden;
+}
+
+.memo-track {
+  display: flex;
+  align-items: flex-start;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory; /* 손을 떼면 메모 한 장 단위로 딱 멈춤 */
+  scrollbar-width: none; /* 가로 스크롤바 숨기기 */
+  overscroll-behavior-x: contain; /* 끝까지 밀어도 화면 뒤로가기 안 되게 */
+}
+
+.memo-track::-webkit-scrollbar {
+  display: none;
+}
+
+.memo-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  scroll-snap-align: start;
+}
+
+.memo-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 4px 4px;
+}
+
+.memo-nav button {
+  width: 32px;
+  height: 28px;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.memo-nav button:hover {
+  background: #eceef1;
+}
+
+.memo-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.memo-dots i {
+  width: 6px;
+  height: 6px;
+  background: #d1d5db;
+  border-radius: 50%;
+  transition: background 0.15s, width 0.15s;
+}
+
+.memo-dots i.on {
+  width: 14px;
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+.memo-count {
+  min-width: 30px;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* 추가/수정 창의 메모 목록 */
+.memos-edit {
+  display: grid;
+  gap: 8px;
+}
+
+.memo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.memo-row textarea {
+  flex: 1;
 }
 
 .memo {
