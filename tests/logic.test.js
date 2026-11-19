@@ -139,9 +139,9 @@ const calItems = [
 ];
 const evs = t.calendarEvents(calItems);
 eq("같은 날 마감 2개", evs["2026-11-17"].map((e) => e.item.id), ["c1", "c2"]);
-eq("수령일도 일정", evs["2026-11-10"].map((e) => e.type), ["received"]);
+eq("수령일은 달력에 안 나옴", evs["2026-11-10"], undefined);
 eq("완료한 항목은 회색", t.eventClass(evs["2026-12-01"][0]), "ev-done");
-eq("수령은 보라", t.eventClass(evs["2026-11-10"][0]), "ev-received");
+eq("수령 표시 없음", /수령/.test(t.calendarHtml(calItems, 2026, 10, "2026-11-10")), false);
 const cal = t.calendarHtml(calItems, 2026, 10, "2026-11-17"); // 2026년 11월
 eq("달 제목", /2026년 11월/.test(cal), true);
 eq("11/1은 일요일 → 앞에 빈 칸 없이 시작, 5주(35칸)", (cal.match(/data-cal-date=/g) || []).length === 35 && /data-cal-date="2026-11-01"/.test(cal.split("cal-day")[1]), true);

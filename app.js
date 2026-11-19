@@ -429,7 +429,7 @@ function renderSummary() {
 }
 
 // ----- 일정 달력 -----
-// 날짜별 일정: 리뷰 마감일, 수령일
+// 날짜별 일정: 리뷰 마감일만
 const calendarSide = $("calendarSide");
 const calendarSheet = $("calendarSheet");
 const calendarDialog = $("calendarDialog");
@@ -442,21 +442,18 @@ const ymd = (y, m, d) => {
   return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
 };
 
-// { "2026-11-26": [{ type: "due" | "received", item }, ...] }
+// { "2026-11-26": [{ item }, ...] }
 function calendarEvents(list) {
   const map = {};
-  const add = (date, type, item) => date && (map[date] ||= []).push({ type, item });
   list.forEach((it) => {
-    add(it.review_due, "due", it);
-    add(it.received_date, "received", it);
+    if (it.review_due) (map[it.review_due] ||= []).push({ item: it });
   });
   return map;
 }
 
-// 일정 점 색깔: 마감은 남은 날짜에 따라, 끝난 건 회색
+// 일정 점 색깔: 남은 날짜에 따라, 끝난 건 회색
 function eventClass(ev) {
   if (isClosed(ev.item)) return "ev-done";
-  if (ev.type === "received") return "ev-received";
   const d = daysFromToday(ev.item.review_due);
   return d < 0 ? "ev-overdue" : d <= 3 ? "ev-soon" : "ev-due";
 }
@@ -492,9 +489,9 @@ function calendarHtml(list, year, month, selected) {
     ? picked.map((ev) => `
       <li>
         <button type="button" class="cal-event" data-cal-edit="${ev.item.id}">
-          <span class="ev-tag ${eventClass(ev)}">${ev.type === "due" ? "리뷰 마감" : "수령"}</span>
+          <span class="ev-tag ${eventClass(ev)}">리뷰 마감</span>
           <span class="cal-event-title">${esc(ev.item.title)}</span>
-          ${ev.type === "due" ? dueBadge(ev.item) : ""}
+          ${dueBadge(ev.item)}
         </button>
       </li>`).join("")
     : `<li class="cal-none">일정이 없어요.</li>`;
@@ -514,7 +511,7 @@ function calendarHtml(list, year, month, selected) {
       <span><i class="ev-due"></i>리뷰 마감</span>
       <span><i class="ev-soon"></i>3일 내</span>
       <span><i class="ev-overdue"></i>지남</span>
-      <span><i class="ev-received"></i>수령</span>
+      <span><i class="ev-done"></i>완료</span>
     </div>
     <div class="cal-list">
       <h3>${formatDate(selected)}</h3>

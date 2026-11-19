@@ -1035,27 +1035,22 @@ dialog::backdrop {
 
 .cal-dots {
   display: flex;
-  gap: 2px;
-  height: 5px;
+  gap: 3px;
+  height: 8px;
 }
 
 .cal-dots i,
 .cal-legend i {
-  width: 5px;
-  height: 5px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
 }
 
-.cal-day.selected .cal-dots i {
-  box-shadow: 0 0 0 1px #fff;
-}
-
-/* 일정 색: 마감(파랑) · 3일 내(주황) · 지남(빨강) · 수령(보라) · 끝난 것(회색) */
+/* 리뷰 마감 색: 마감(파랑) · 3일 내(주황) · 지남(빨강) · 끝난 것(회색) */
 .ev-due { background: var(--primary); }
 .ev-soon { background: var(--soon); }
 .ev-overdue { background: var(--overdue); }
-.ev-received { background: var(--visit); }
-.ev-done { background: #c4c8cf; }
+.ev-done { background: #b8bdc6; }
 
 .cal-legend {
   display: flex;
@@ -1072,9 +1067,8 @@ dialog::backdrop {
   gap: 4px;
 }
 
-.cal-legend i {
-  width: 7px;
-  height: 7px;
+.cal-day.selected .cal-dots i {
+  box-shadow: 0 0 0 1.5px #fff;
 }
 
 /* 고른 날짜의 일정 목록 */
