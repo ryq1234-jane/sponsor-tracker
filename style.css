@@ -505,6 +505,22 @@ button {
   text-decoration: line-through;
 }
 
+/* 신청 종류 목록: 화살표는 "신청" 버튼(1번째 칸)을 가리키고, 체크한 종류는 줄 긋지 않고 진하게 */
+.apply-list::before {
+  right: auto;
+  left: calc(12.5% - 7px);
+}
+
+.post-list.apply-list li .post-name {
+  color: var(--muted);
+}
+
+.post-list.apply-list li.done .post-name {
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .post-list a {
   flex-shrink: 0;
   font-size: 0.8rem;
@@ -829,6 +845,20 @@ dialog::backdrop {
 
 .review-block small {
   color: var(--muted);
+}
+
+/* 신청 + 그 아래 신청 종류 (리뷰-게시물과 같은 하위 메뉴 모양) */
+.apply-block {
+  margin-bottom: 10px;
+}
+
+.sub-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 8px 0 0 8px;
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
 }
 
 .review-block .posts-edit {

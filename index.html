@@ -86,8 +86,13 @@
 
         <fieldset class="field checks">
           <legend>진행 체크</legend>
-          <div class="checks-line">
+          <!-- 신청 + 그 아래 신청 종류 (제품 제공 / 유가 협찬) -->
+          <div class="apply-block">
             <label><input type="checkbox" name="applied"> 신청</label>
+            <div id="applyTypes" class="sub-checks"></div> <!-- script에서 채움 -->
+          </div>
+
+          <div class="checks-line">
             <label><input type="checkbox" name="selected"> 선정</label>
             <label><input type="checkbox" name="rejected"> 미선정</label>
             <label><input type="checkbox" name="received"> 택배 수령</label>

@@ -161,6 +161,13 @@ function getPosts(it) {
 
 const postLabel = (p, i) => p.label || `게시물 ${i + 1}`;
 
+// 신청 종류 (신청의 하위 메뉴). 저장할 땐 체크한 이름만 ["제품 제공", "유가 협찬"]
+const APPLY_TYPES = ["제품 제공", "유가 협찬"];
+
+function getApplyTypes(it) {
+  return Array.isArray(it?.apply_types) ? it.apply_types.filter((t) => APPLY_TYPES.includes(t)) : [];
+}
+
 // 메모 여러 개 ["...", "..."]
 // 예전에 만든 항목은 메모 칸(memo) 하나를 첫 메모로 보여줌
 function getMemos(it) {
@@ -295,8 +302,20 @@ function cardHtml(it) {
   // 카드의 진행 상황은 "표시"만 (누를 수 없음). 체크는 수정 창에서.
   const step = (field, label) => `<span class="chip ${it[field] ? "on" : ""}">${label}</span>`;
 
+  // "신청" 버튼을 누르면 아래로 펼쳐지는 신청 종류 (표시만)
+  const applyOpen = expandedLists.has(`apply-${it.id}`);
+  const applied = getApplyTypes(it);
+  const applyList = `
+    <ul class="post-list apply-list" id="apply-${it.id}" ${applyOpen ? "" : "hidden"}>
+      ${APPLY_TYPES.map((type) => `
+        <li class="${applied.includes(type) ? "done" : ""}">
+          <span class="post-mark" aria-label="${applied.includes(type) ? "신청함" : "신청 안 함"}"></span>
+          <span class="post-name">${type}</span>
+        </li>`).join("")}
+    </ul>`;
+
   // "리뷰" 버튼을 누르면 아래로 펼쳐지는 게시물 목록 (표시만)
-  const postsOpen = expandedPosts.has(it.id);
+  const postsOpen = expandedLists.has(`posts-${it.id}`);
   const postList = `
     <ul class="post-list" id="posts-${it.id}" ${postsOpen ? "" : "hidden"}>
       ${posts.map((p, i) => {
@@ -356,13 +375,15 @@ function cardHtml(it) {
       </dl>` : ""}
 
       <div class="checks-row">
-        ${step("applied", "신청")}
+        <button type="button" class="chip review-chip ${it.applied ? "on" : ""}"
+          data-list-toggle="apply-${it.id}" aria-expanded="${applyOpen}" aria-controls="apply-${it.id}">신청</button>
         ${step("selected", "선정")}
         ${step("received", "수령")}
         <button type="button" class="chip review-chip ${it.reviewed ? "on" : ""}"
-          data-posts-toggle="${it.id}" aria-expanded="${postsOpen}" aria-controls="posts-${it.id}">리뷰 ${postsDone}/${posts.length}</button>
+          data-list-toggle="posts-${it.id}" aria-expanded="${postsOpen}" aria-controls="posts-${it.id}">리뷰 ${postsDone}/${posts.length}</button>
       </div>
 
+      ${applyList}
       ${postList}
 
       ${memoBox}
@@ -413,7 +434,7 @@ function render() {
 // 메모가 세 줄을 넘을 때만 "더보기" 버튼 보이기
 // (화면에 그려진 뒤에야 실제 높이를 알 수 있어서 render 다음에 확인)
 const expandedMemos = new Set(); // 펼쳐 둔 메모 ("항목id:메모번호")
-const expandedPosts = new Set(); // 게시물 목록을 펼쳐 둔 항목 id
+const expandedLists = new Set(); // 펼쳐 둔 하위 목록 ("apply-항목id" 신청 종류, "posts-항목id" 게시물)
 const memoIndex = new Map(); // 항목 id → 지금 보고 있는 메모 번호
 
 // ----- 메모 슬라이드 -----
@@ -455,16 +476,16 @@ window.addEventListener("resize", () => {
   updateMemoToggles();
 });
 
-// 카드 안의 리뷰(게시물 목록)·메모 펼치기, 수정 버튼 (목록 전체에 한 번만 연결)
+// 카드 안의 신청(종류)·리뷰(게시물 목록)·메모 펼치기, 수정 버튼 (목록 전체에 한 번만 연결)
 list.addEventListener("click", (e) => {
-  const postsToggle = e.target.closest("[data-posts-toggle]");
-  if (postsToggle) {
-    const id = postsToggle.dataset.postsToggle;
-    const open = !expandedPosts.has(id);
-    if (open) expandedPosts.add(id);
-    else expandedPosts.delete(id);
-    postsToggle.setAttribute("aria-expanded", open);
-    $(`posts-${id}`).hidden = !open;
+  const listToggle = e.target.closest("[data-list-toggle]");
+  if (listToggle) {
+    const key = listToggle.dataset.listToggle;
+    const open = !expandedLists.has(key);
+    if (open) expandedLists.add(key);
+    else expandedLists.delete(key);
+    listToggle.setAttribute("aria-expanded", open);
+    $(key).hidden = !open;
     return;
   }
 
@@ -586,6 +607,19 @@ postsList.addEventListener("change", (e) => {
   updateReviewProgress();
   syncReviewedFromPosts();
 });
+
+// ----- 신청 종류 (창 안) -----
+const applyTypesBox = $("applyTypes");
+applyTypesBox.innerHTML = APPLY_TYPES.map((type) =>
+  `<label><input type="checkbox" data-apply-type="${type}"> ${type}</label>`).join("");
+const applyTypeInputs = () => [...applyTypesBox.querySelectorAll("[data-apply-type]")];
+
+// 종류를 하나라도 체크하면 "신청"도 자동 체크 (해제할 땐 신청은 그대로 둠)
+applyTypesBox.addEventListener("change", (e) => {
+  if (!e.target.checked || editForm.elements.applied.checked) return;
+  Object.entries(cascade("applied", true)).forEach(([k, v]) => (editForm.elements[k].checked = v));
+});
+
 const CHECK_FIELDS = ["applied", "selected", "rejected", "received", "reviewed"];
 
 function openEditor(item = null) {
@@ -598,6 +632,8 @@ function openEditor(item = null) {
   dueEditedByHand = !!item?.review_due && item.review_due !== calcDue(item.received_date, item.review_days);
   CHECK_FIELDS.forEach((f) => (editForm.elements[f].checked = !!item?.[f]));
   if (!item) editForm.elements.applied.checked = true; // 새로 추가할 땐 보통 신청한 상태
+  const types = getApplyTypes(item);
+  applyTypeInputs().forEach((cb) => (cb.checked = types.includes(cb.dataset.applyType)));
 
   formPosts = getPosts(item).map((p) => ({ label: p.label || "", url: p.url || "", done: !!p.done }));
   renderPostRows();
@@ -618,6 +654,8 @@ CHECK_FIELDS.forEach((f) => {
   editForm.elements[f].addEventListener("change", (e) => {
     const changes = cascade(f, e.target.checked);
     Object.entries(changes).forEach(([k, v]) => (editForm.elements[k].checked = v));
+    // "신청"을 해제하면 신청 종류도 모두 해제
+    if (changes.applied === false) applyTypeInputs().forEach((cb) => (cb.checked = false));
     // "리뷰 작성"이 바뀌면 게시물 체크도 모두 같이
     if ("reviewed" in changes) {
       formPosts.forEach((p) => (p.done = changes.reviewed));
@@ -660,6 +698,7 @@ editForm.addEventListener("submit", async (e) => {
   });
   if (payload.review_days !== null) payload.review_days = parseInt(payload.review_days, 10) || null;
   CHECK_FIELDS.forEach((f) => (payload[f] = editForm.elements[f].checked));
+  payload.apply_types = applyTypeInputs().filter((cb) => cb.checked).map((cb) => cb.dataset.applyType);
   payload.posts = formPosts.map((p) => ({ label: p.label.trim(), url: p.url.trim(), done: p.done }));
   payload.review_url = null; // 리뷰 주소는 이제 게시물마다 저장
   payload.memos = formMemos.map((m) => m.trim()).filter(Boolean); // 빈 메모는 빼고 저장

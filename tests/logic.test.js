@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, expandedMemos, expandedPosts, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, expandedMemos, expandedLists, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -75,12 +75,23 @@ eq("카드에 리뷰 1/3 표시", /리뷰 1\/3/.test(pc), true);
 eq("카드에 게시물 이름 표시 (빈 이름은 '게시물 3')", /피드/.test(pc) && /릴스/.test(pc) && /게시물 3/.test(pc), true);
 eq("게시물 링크 표시", /https:\/\/ig\.com\/r/.test(pc), true);
 eq("카드에는 누를 수 있는 체크박스가 없음", /type="checkbox"/.test(pc), false);
-eq("리뷰 버튼이 게시물 목록을 여닫음", /data-posts-toggle="p"/.test(pc) && /aria-controls="posts-p"/.test(pc), true);
+eq("리뷰 버튼이 게시물 목록을 여닫음", /data-list-toggle="posts-p"/.test(pc) && /aria-controls="posts-p"/.test(pc), true);
 eq("게시물 목록은 처음엔 접혀 있음", /id="posts-p"\s+hidden/.test(pc), true);
-t.expandedPosts.add("p");
+t.expandedLists.add("posts-p");
 eq("펼친 게시물 목록은 다시 그려도 펼친 상태", /id="posts-p"\s+>/.test(t.cardHtml(three)) && /aria-expanded="true"/.test(t.cardHtml(three)), true);
 eq("게시물 1개여도 리뷰 1/1 메뉴", /리뷰 0\/1/.test(t.cardHtml({ ...three, id: "q", posts: [three.posts[1]] })), true);
 eq("완료한 게시물은 완료 표시", /<li class="done">/.test(pc), true);
+
+// 신청 종류 (신청의 하위 메뉴)
+eq("예전 항목은 신청 종류 없음", t.getApplyTypes({ applied: true }), []);
+eq("모르는 종류는 무시", t.getApplyTypes({ apply_types: ["유가 협찬", "이상한값"] }), ["유가 협찬"]);
+const ac = t.cardHtml({ ...three, id: "ap", apply_types: ["유가 협찬"] });
+eq("신청 버튼이 신청 종류 목록을 여닫음", /data-list-toggle="apply-ap"/.test(ac) && /aria-controls="apply-ap"/.test(ac), true);
+eq("신청 종류 목록은 처음엔 접혀 있음", /id="apply-ap"\s+hidden/.test(ac), true);
+eq("두 종류 모두 표시, 유가 협찬만 체크", /<li class="">\s*<span[^>]*><\/span>\s*<span class="post-name">제품 제공/.test(ac) && /<li class="done">\s*<span[^>]*><\/span>\s*<span class="post-name">유가 협찬/.test(ac), true);
+eq("신청 칩은 신청 상태면 체크 표시", /review-chip on"\s+data-list-toggle="apply-ap"/.test(ac), true);
+t.expandedLists.add("apply-ap");
+eq("펼친 신청 종류는 다시 그려도 펼친 상태", /id="apply-ap"\s+>/.test(t.cardHtml({ ...three, id: "ap" })), true);
 
 // 메모 (여러 개, 슬라이드)
 eq("예전 메모 1개 → 메모 목록으로", t.getMemos({ memo: "옛 메모", memos: [] }), ["옛 메모"]);
