@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>협찬 체크리스트</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== 로그인 화면 ===== -->
+  <main id="authView" class="auth" hidden>
+    <div class="auth-card">
+      <h1>협찬 체크리스트</h1>
+      <p class="muted">신청부터 리뷰 마감까지 한곳에서 관리해요.</p>
+
+      <form id="authForm">
+        <label class="field">
+          <span>이메일</span>
+          <input type="email" id="authEmail" autocomplete="email" required>
+        </label>
+        <label class="field">
+          <span>비밀번호 (6자 이상)</span>
+          <input type="password" id="authPassword" autocomplete="current-password" minlength="6" required>
+        </label>
+        <p id="authMessage" class="message" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block" id="authSubmit">로그인</button>
+      </form>
+
+      <button type="button" class="link" id="authToggle">처음이신가요? 회원가입</button>
+    </div>
+  </main>
+
+  <!-- ===== 메인 화면 ===== -->
+  <div id="appView" class="app" hidden>
+    <header class="topbar">
+      <h1>협찬 체크리스트</h1>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-primary" id="addButton">+ 새 협찬</button>
+        <button type="button" class="btn btn-ghost" id="logoutButton">로그아웃</button>
+      </div>
+    </header>
+
+    <!-- 요약 숫자 -->
+    <section class="summary" id="summary"></section>
+
+    <!-- 보기 필터 -->
+    <nav class="filters" id="filters">
+      <button type="button" data-filter="active" class="active">진행 중</button>
+      <button type="button" data-filter="applied">선정 대기</button>
+      <button type="button" data-filter="done">완료</button>
+      <button type="button" data-filter="all">전체</button>
+    </nav>
+
+    <!-- 목록 (리뷰 마감일 가까운 순) -->
+    <main class="list" id="list"></main>
+    <p class="empty" id="emptyMessage" hidden></p>
+  </div>
+
+  <!-- ===== 추가/수정 창 ===== -->
+  <dialog id="editDialog">
+    <form id="editForm" method="dialog">
+      <header class="dialog-head">
+        <h2 id="editTitle">새 협찬</h2>
+        <button type="button" class="icon-btn" id="editClose" aria-label="닫기">✕</button>
+      </header>
+
+      <div class="dialog-body">
+        <label class="field">
+          <span>브랜드 / 캠페인 이름 *</span>
+          <input type="text" name="title" required placeholder="예: OO리빙 무드등 체험단">
+        </label>
+
+        <div class="grid-2">
+          <label class="field">
+            <span>모집처</span>
+            <input type="text" name="platform" placeholder="예: 레뷰, 브랜드 DM" list="platformList">
+            <datalist id="platformList"></datalist>
+          </label>
+          <label class="field">
+            <span>제공 내용</span>
+            <input type="text" name="offer" placeholder="예: 패브릭 쿠션 2개 (6만원)">
+          </label>
+        </div>
+
+        <fieldset class="field checks">
+          <legend>진행 체크</legend>
+          <label><input type="checkbox" name="applied"> 신청</label>
+          <label><input type="checkbox" name="selected"> 선정</label>
+          <label><input type="checkbox" name="rejected"> 미선정</label>
+          <label><input type="checkbox" name="received"> 택배 수령</label>
+          <label><input type="checkbox" name="reviewed"> 리뷰 작성</label>
+        </fieldset>
+
+        <div class="grid-2">
+          <label class="field">
+            <span>수령일</span>
+            <input type="date" name="received_date">
+          </label>
+          <label class="field">
+            <span>수령 후 며칠 이내 리뷰</span>
+            <input type="number" name="review_days" min="1" max="90" inputmode="numeric" placeholder="예: 7">
+          </label>
+        </div>
+
+        <label class="field">
+          <span>리뷰 마감일</span>
+          <input type="date" name="review_due">
+          <small class="hint">수령일과 "며칠 이내"를 넣으면 자동으로 계산돼요. 날짜가 정해진 캠페인은 직접 입력하세요.</small>
+        </label>
+
+        <label class="field">
+          <span>모집 글 URL</span>
+          <input type="url" name="recruit_url" placeholder="https://">
+        </label>
+        <label class="field">
+          <span>작성한 리뷰 URL</span>
+          <input type="url" name="review_url" placeholder="https://">
+        </label>
+
+        <label class="field">
+          <span>메모</span>
+          <textarea name="memo" rows="3" placeholder="필수 키워드·해시태그, 사진/영상 개수, 송장번호 등"></textarea>
+        </label>
+
+        <p id="editMessage" class="message" hidden></p>
+      </div>
+
+      <footer class="dialog-foot">
+        <button type="button" class="btn btn-danger" id="deleteButton" hidden>삭제</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost" id="editCancel">취소</button>
+        <button type="submit" class="btn btn-primary" id="saveButton">저장</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- 삭제 확인 창 -->
+  <dialog id="confirmDialog" class="confirm">
+    <p id="confirmText">정말 삭제할까요?</p>
+    <div class="dialog-foot">
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-ghost" id="confirmNo">취소</button>
+      <button type="button" class="btn btn-danger" id="confirmYes">삭제</button>
+    </div>
+  </dialog>
+
+  <!-- 알림 메시지 -->
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+/* ===== 색과 기본 설정 ===== */
+:root {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --primary: #3b6ef5;
+  --primary-soft: #e8eefe;
+  --soon: #e8590c;
+  --soon-soft: #fff1e6;
+  --overdue: #d92d20;
+  --overdue-soft: #fdecea;
+  --done: #2f9e44;
+  --done-soft: #e9f7ec;
+  --visit: #7048e8;
+  --visit-soft: #f0ebfe;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-text-size-adjust: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+/* ===== 버튼 ===== */
+.btn {
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.btn-primary {
+  color: #fff;
+  background: var(--primary);
+}
+
+.btn-primary:hover {
+  background: #2c58d1;
+}
+
+.btn-ghost {
+  color: var(--muted);
+  background: transparent;
+}
+
+.btn-ghost:hover {
+  background: #eceef1;
+}
+
+.btn-danger {
+  color: var(--overdue);
+  background: var(--overdue-soft);
+}
+
+.btn-block {
+  width: 100%;
+  padding: 12px;
+}
+
+.btn-small {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.link {
+  margin-top: 16px;
+  padding: 4px;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.icon-btn:hover {
+  background: #eceef1;
+}
+
+/* ===== 입력칸 ===== */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px; /* 16px 이상이면 아이폰에서 입력할 때 확대되지 않음 */
+  font-weight: 400;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 2px solid var(--primary);
+  border-color: transparent;
+}
+
+.hint {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+
+.message {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--done);
+  background: var(--done-soft);
+  border-radius: 8px;
+}
+
+.message.error {
+  color: var(--overdue);
+  background: var(--overdue-soft);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ===== 로그인 화면 ===== */
+.auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px 16px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 28px 24px;
+  text-align: center;
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.auth-card h1 {
+  margin: 0 0 6px;
+  font-size: 1.4rem;
+}
+
+.auth-card .muted {
+  margin: 0 0 24px;
+  font-size: 0.9rem;
+}
+
+.auth-card form {
+  text-align: left;
+}
+
+/* ===== 메인 화면 ===== */
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px calc(32px + env(safe-area-inset-bottom, 0px));
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  background: rgba(244, 245, 247, 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* 요약 숫자 */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 4px;
+  background: var(--card);
+  border-radius: 12px;
+}
+
+.stat b {
+  font-size: 1.35rem;
+}
+
+.stat span {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.stat.has-waiting b { color: var(--visit); }
+.stat.has-soon b { color: var(--soon); }
+.stat.has-overdue b { color: var(--overdue); }
+
+/* 필터 */
+.filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.filters button {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filters button.active {
+  color: #fff;
+  background: var(--text);
+  border-color: var(--text);
+}
+
+/* ===== 카드 ===== */
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line);
+  border-radius: 12px;
+}
+
+.card.is-soon { border-left-color: var(--soon); }
+.card.is-overdue { border-left-color: var(--overdue); background: #fffafa; }
+.card.stage-done,
+.card.stage-rejected { opacity: 0.65; }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stage,
+.platform,
+.dday {
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.stage { color: var(--primary); background: var(--primary-soft); }
+.stage-selected .stage { color: var(--visit); background: var(--visit-soft); }
+.stage-received .stage { color: var(--soon); background: var(--soon-soft); }
+.stage-done .stage { color: var(--done); background: var(--done-soft); }
+.stage-rejected .stage,
+.stage-planned .stage { color: var(--muted); background: #f1f2f4; }
+
+.platform {
+  color: var(--muted);
+  background: #f1f2f4;
+}
+
+.dday {
+  color: var(--text);
+  background: #f1f2f4;
+}
+
+.dday.soon { color: #fff; background: var(--soon); }
+.dday.overdue { color: #fff; background: var(--overdue); }
+
+.card-title {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.offer {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+}
+
+.meta div {
+  display: flex;
+  gap: 6px;
+}
+
+.meta dt {
+  color: var(--muted);
+}
+
+.meta dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* 카드 안의 체크 버튼 */
+.checks-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.chip-check {
+  position: relative;
+  cursor: pointer;
+}
+
+.chip-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip-check span {
+  display: block;
+  padding: 9px 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--muted);
+  background: #f6f7f9;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.chip-check span::before {
+  content: "○ ";
+}
+
+.chip-check input:checked + span {
+  color: var(--done);
+  background: var(--done-soft);
+  border-color: #b7e4c0;
+}
+
+.chip-check input:checked + span::before {
+  content: "✓ ";
+}
+
+.chip-check input:focus-visible + span {
+  outline: 2px solid var(--primary);
+}
+
+.memo {
+  margin: 12px 0 0;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  background: #f9fafb;
+  border-radius: 8px;
+  white-space: pre-line; /* 메모의 줄바꿈 그대로 표시 */
+}
+
+.card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.links a {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ===== 추가/수정 창 ===== */
+dialog {
+  width: min(560px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+#editForm {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 24px);
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dialog-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.dialog-body {
+  padding: 16px 20px 4px;
+  overflow-y: auto;
+}
+
+.dialog-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.checks {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.checks legend {
+  padding: 0 4px;
+}
+
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 400;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.checks input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.confirm {
+  width: min(380px, calc(100% - 32px));
+}
+
+.confirm p {
+  margin: 0;
+  padding: 22px 20px 8px;
+  line-height: 1.5;
+}
+
+.confirm .dialog-foot {
+  border-top: none;
+}
+
+/* 알림 메시지 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  color: #fff;
+  background: rgba(31, 35, 40, 0.92);
+  border-radius: 10px;
+}
+
+/* ===== 휴대폰 ===== */
+@media (max-width: 560px) {
+  /* 추가/수정 창은 아래에서 올라오는 시트 모양으로 */
+  dialog:not(.confirm) {
+    width: 100%;
+    max-width: 100%;
+    margin: auto 0 0;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .topbar h1 {
+    font-size: 1rem;
+  }
+
+  .stat b {
+    font-size: 1.15rem;
+  }
+
+  .stat span {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar .btn {
+    padding: 8px 10px;
+  }
+}
