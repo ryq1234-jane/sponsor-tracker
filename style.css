@@ -948,6 +948,242 @@ dialog::backdrop {
   border-radius: 10px;
 }
 
+/* ===== 일정 달력 ===== */
+.side {
+  display: none; /* PC에서만 보임 (아래 @media) */
+}
+
+.cal-card {
+  padding: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.cal-head b {
+  min-width: 96px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.cal-head [data-cal-today] {
+  margin-left: auto;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-wd {
+  padding: 4px 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--muted);
+}
+
+.cal-wd:first-child { color: var(--overdue); }
+.cal-wd:nth-child(7) { color: var(--primary); }
+
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 42px;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cal-day:hover {
+  background: #f1f2f4;
+}
+
+.cal-day.other {
+  color: #c4c8cf;
+}
+
+.cal-day.today .num {
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.cal-day.selected,
+.cal-day.selected:hover {
+  color: #fff;
+  background: var(--primary);
+}
+
+.cal-day.selected .num {
+  color: #fff;
+}
+
+.cal-dots {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+}
+
+.cal-dots i,
+.cal-legend i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.cal-day.selected .cal-dots i {
+  box-shadow: 0 0 0 1px #fff;
+}
+
+/* 일정 색: 마감(파랑) · 3일 내(주황) · 지남(빨강) · 수령(보라) · 끝난 것(회색) */
+.ev-due { background: var(--primary); }
+.ev-soon { background: var(--soon); }
+.ev-overdue { background: var(--overdue); }
+.ev-received { background: var(--visit); }
+.ev-done { background: #c4c8cf; }
+
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.cal-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cal-legend i {
+  width: 7px;
+  height: 7px;
+}
+
+/* 고른 날짜의 일정 목록 */
+.cal-list {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.cal-list h3 {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+}
+
+.cal-list ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cal-none {
+  padding: 6px 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.cal-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  text-align: left;
+  color: var(--text);
+  background: #f9fafb;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cal-event:hover {
+  border-color: var(--primary);
+}
+
+.ev-tag {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 5px;
+}
+
+.cal-event-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 휴대폰 달력 창 */
+.cal-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-dialog .dialog-body {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.cal-dialog .cal-day {
+  height: 46px;
+  font-size: 0.95rem;
+}
+
+/* ===== PC (넓은 화면): 왼쪽 달력 + 오른쪽 목록 ===== */
+@media (min-width: 1024px) {
+  .app {
+    max-width: 1140px;
+  }
+
+  .app-body {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .side {
+    display: block;
+    position: sticky;
+    top: 72px;
+  }
+
+  .topbar .cal-btn {
+    display: none; /* PC에서는 달력 버튼 대신 왼쪽 달력 */
+  }
+}
+
+.cal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ===== 휴대폰 ===== */
 @media (max-width: 560px) {
   /* 추가/수정 창은 아래에서 올라오는 시트 모양으로 */

@@ -428,8 +428,154 @@ function renderSummary() {
     <div class="stat ${overdue ? "has-overdue" : ""}"><b>${overdue}</b><span>마감 지남</span></div>`;
 }
 
+// ----- 일정 달력 -----
+// 날짜별 일정: 리뷰 마감일, 수령일
+const calendarSide = $("calendarSide");
+const calendarSheet = $("calendarSheet");
+const calendarDialog = $("calendarDialog");
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0 = 1월
+let calSelected = todayStr();
+
+const ymd = (y, m, d) => {
+  const t = new Date(y, m, d);
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
+};
+
+// { "2026-11-26": [{ type: "due" | "received", item }, ...] }
+function calendarEvents(list) {
+  const map = {};
+  const add = (date, type, item) => date && (map[date] ||= []).push({ type, item });
+  list.forEach((it) => {
+    add(it.review_due, "due", it);
+    add(it.received_date, "received", it);
+  });
+  return map;
+}
+
+// 일정 점 색깔: 마감은 남은 날짜에 따라, 끝난 건 회색
+function eventClass(ev) {
+  if (isClosed(ev.item)) return "ev-done";
+  if (ev.type === "received") return "ev-received";
+  const d = daysFromToday(ev.item.review_due);
+  return d < 0 ? "ev-overdue" : d <= 3 ? "ev-soon" : "ev-due";
+}
+
+function calendarHtml(list, year, month, selected) {
+  const events = calendarEvents(list);
+  const today = todayStr();
+  const offset = new Date(year, month, 1).getDay(); // 1일이 무슨 요일인지
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = Math.ceil((offset + daysInMonth) / 7) * 7;
+
+  let days = "";
+  for (let i = 0; i < cells; i++) {
+    const date = ymd(year, month, i - offset + 1);
+    const [, m, d] = date.split("-").map(Number);
+    const evs = events[date] || [];
+    const cls = [
+      "cal-day",
+      m - 1 !== month ? "other" : "",
+      date === today ? "today" : "",
+      date === selected ? "selected" : "",
+    ].filter(Boolean).join(" ");
+    days += `
+      <button type="button" class="${cls}" data-cal-date="${date}" aria-label="${m}월 ${d}일${evs.length ? `, 일정 ${evs.length}개` : ""}">
+        <span class="num">${d}</span>
+        <span class="cal-dots">${evs.slice(0, 3).map((ev) => `<i class="${eventClass(ev)}"></i>`).join("")}</span>
+      </button>`;
+  }
+
+  // 고른 날짜의 일정 목록
+  const picked = events[selected] || [];
+  const dayList = picked.length
+    ? picked.map((ev) => `
+      <li>
+        <button type="button" class="cal-event" data-cal-edit="${ev.item.id}">
+          <span class="ev-tag ${eventClass(ev)}">${ev.type === "due" ? "리뷰 마감" : "수령"}</span>
+          <span class="cal-event-title">${esc(ev.item.title)}</span>
+          ${ev.type === "due" ? dueBadge(ev.item) : ""}
+        </button>
+      </li>`).join("")
+    : `<li class="cal-none">일정이 없어요.</li>`;
+
+  return `
+    <div class="cal-head">
+      <button type="button" class="icon-btn" data-cal-nav="-1" aria-label="이전 달">‹</button>
+      <b>${year}년 ${month + 1}월</b>
+      <button type="button" class="icon-btn" data-cal-nav="1" aria-label="다음 달">›</button>
+      <button type="button" class="btn btn-ghost btn-small" data-cal-today>오늘</button>
+    </div>
+    <div class="cal-grid">
+      ${[..."일월화수목금토"].map((w) => `<span class="cal-wd">${w}</span>`).join("")}
+      ${days}
+    </div>
+    <div class="cal-legend">
+      <span><i class="ev-due"></i>리뷰 마감</span>
+      <span><i class="ev-soon"></i>3일 내</span>
+      <span><i class="ev-overdue"></i>지남</span>
+      <span><i class="ev-received"></i>수령</span>
+    </div>
+    <div class="cal-list">
+      <h3>${formatDate(selected)}</h3>
+      <ul>${dayList}</ul>
+    </div>`;
+}
+
+function renderCalendars() {
+  const html = calendarHtml(items, calYear, calMonth, calSelected);
+  calendarSide.innerHTML = html;
+  calendarSheet.innerHTML = html;
+}
+
+// 달력 안의 버튼들 (PC 왼쪽 달력, 휴대폰 달력 창 둘 다)
+function onCalendarClick(e) {
+  const nav = e.target.closest("[data-cal-nav]");
+  if (nav) {
+    const t = new Date(calYear, calMonth + Number(nav.dataset.calNav), 1);
+    calYear = t.getFullYear();
+    calMonth = t.getMonth();
+    return renderCalendars();
+  }
+  if (e.target.closest("[data-cal-today]")) {
+    calSelected = todayStr();
+    calYear = new Date().getFullYear();
+    calMonth = new Date().getMonth();
+    return renderCalendars();
+  }
+  const day = e.target.closest("[data-cal-date]");
+  if (day) {
+    calSelected = day.dataset.calDate;
+    const [y, m] = calSelected.split("-").map(Number);
+    calYear = y; // 앞뒤 달 날짜를 누르면 그 달로 이동
+    calMonth = m - 1;
+    return renderCalendars();
+  }
+  // 일정을 누르면 그 협찬의 수정 창 열기
+  const ev = e.target.closest("[data-cal-edit]");
+  if (ev) {
+    if (calendarDialog.open) calendarDialog.close();
+    openEditor(items.find((it) => it.id === ev.dataset.calEdit));
+  }
+}
+
+calendarSide.addEventListener("click", onCalendarClick);
+calendarSheet.addEventListener("click", onCalendarClick);
+
+$("calendarButton").addEventListener("click", () => {
+  renderCalendars();
+  calendarDialog.showModal();
+});
+$("calendarClose").addEventListener("click", () => calendarDialog.close());
+
+// 휴대폰 달력 창을 연 채로 화면이 PC 폭으로 넓어지면 창은 닫기 (왼쪽 달력이 대신 보임)
+window.matchMedia?.("(min-width: 1024px)").addEventListener?.("change", (e) => {
+  if (e.matches && calendarDialog.open) calendarDialog.close();
+});
+
 function render() {
   renderSummary();
+  renderCalendars();
 
   const shown = sortItems(items.filter(matchesFilter));
   list.innerHTML = shown.map(cardHtml).join("");

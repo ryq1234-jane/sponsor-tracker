@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -130,6 +130,29 @@ eq("링크 없는 글은 그대로(안전 처리만)", t.linkify("<b>굵게</b> 
 eq("javascript: 는 링크 안 됨", /<a/.test(t.linkify("javascript:alert(1)")), false);
 eq("주소 속 따옴표로 코드 삽입 불가", /onmouseover=/.test(t.linkify('https://a.com/"onmouseover="x')) && !/" onmouseover/.test(t.linkify('https://a.com/"onmouseover="x')), true);
 eq("카드 메모에 링크 표시", /<a href="https:\/\/ig\.com\/p"/.test(t.cardHtml({ ...three, memos: ["가이드 https://ig.com/p"] })), true);
+
+// 일정 달력
+const calItems = [
+  { id: "c1", title: "마감항목", applied: true, selected: true, received: true, received_date: "2026-11-10", review_due: "2026-11-17", created_at: "x" },
+  { id: "c2", title: "<b>위험</b>", applied: true, selected: true, received: true, review_due: "2026-11-17", created_at: "x" },
+  { id: "c3", title: "완료", reviewed: true, review_due: "2026-12-01", created_at: "x" },
+];
+const evs = t.calendarEvents(calItems);
+eq("같은 날 마감 2개", evs["2026-11-17"].map((e) => e.item.id), ["c1", "c2"]);
+eq("수령일도 일정", evs["2026-11-10"].map((e) => e.type), ["received"]);
+eq("완료한 항목은 회색", t.eventClass(evs["2026-12-01"][0]), "ev-done");
+eq("수령은 보라", t.eventClass(evs["2026-11-10"][0]), "ev-received");
+const cal = t.calendarHtml(calItems, 2026, 10, "2026-11-17"); // 2026년 11월
+eq("달 제목", /2026년 11월/.test(cal), true);
+eq("11/1은 일요일 → 앞에 빈 칸 없이 시작, 5주(35칸)", (cal.match(/data-cal-date=/g) || []).length === 35 && /data-cal-date="2026-11-01"/.test(cal.split("cal-day")[1]), true);
+eq("2026년 2월은 4주(28칸)", (t.calendarHtml([], 2026, 1, "2026-02-01").match(/data-cal-date=/g) || []).length, 28);
+eq("2026년 8월은 6주(42칸, 1일이 토요일)", (t.calendarHtml([], 2026, 7, "2026-08-01").match(/data-cal-date=/g) || []).length, 42);
+eq("앞뒤 달 날짜는 흐리게", /class="cal-day other" data-cal-date="2026-12-01"/.test(cal) || /cal-day other[^"]*" data-cal-date="2026-12-0/.test(cal), true);
+eq("고른 날짜 표시", /cal-day[^"]*selected" data-cal-date="2026-11-17"/.test(cal), true);
+eq("고른 날짜의 일정 2개 목록", (cal.match(/data-cal-edit=/g) || []).length, 2);
+eq("일정 제목도 안전하게", /<b>위험/.test(cal), false);
+eq("일정 없는 날", /일정이 없어요/.test(t.calendarHtml(calItems, 2026, 10, "2026-11-05")), true);
+eq("일정 3개까지만 점", (t.calendarHtml([...calItems, ...calItems], 2026, 10, "x").split('data-cal-date="2026-11-17"')[1].split("</button>")[0].match(/<i /g) || []).length, 3);
 
 console.log(fail ? `\n${fail}개 실패` : "\n모두 통과");
 process.exit(fail ? 1 : 0);
