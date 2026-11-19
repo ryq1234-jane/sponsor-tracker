@@ -51,6 +51,27 @@ function safeUrl(url) {
   return /^https?:\/\//i.test(url || "") ? url : null;
 }
 
+// 글 속의 주소(https://..., www....)를 누를 수 있는 링크로 바꿈
+// 주소에 쓰이는 영문·숫자·기호까지만 주소로 보고, 바로 뒤에 붙은 한글("...com에서")은 제외
+const URL_IN_TEXT = /(?:https?:\/\/|www\.)[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=%]+/gi;
+
+function linkify(text) {
+  let html = "";
+  let last = 0;
+  for (const match of String(text ?? "").matchAll(URL_IN_TEXT)) {
+    let url = match[0];
+    // 문장 끝의 마침표·쉼표·괄호 등은 주소에서 빼기 (예: "여기 참고 https://a.com.")
+    const tail = (url.match(/[.,!?;:)\]'"]+$/) || [""])[0];
+    url = url.slice(0, url.length - tail.length);
+    const href = /^www\./i.test(url) ? `https://${url}` : url;
+
+    html += esc(text.slice(last, match.index));
+    html += `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a>${esc(tail)}`;
+    last = match.index + match[0].length;
+  }
+  return html + esc(String(text ?? "").slice(last));
+}
+
 // "2026-11-22" → 오늘부터 며칠 남았는지 (오늘 0, 내일 1, 어제 -1)
 function daysFromToday(dateStr) {
   if (!dateStr) return null;
@@ -300,7 +321,7 @@ function cardHtml(it) {
             const open = expandedMemos.has(key);
             return `
             <div class="memo-slide">
-              <p class="memo ${open ? "expanded" : ""}">${esc(m)}</p>
+              <p class="memo ${open ? "expanded" : ""}">${linkify(m)}</p>
               <button type="button" class="memo-toggle" data-memo-toggle="${key}" hidden>${open ? "접기" : "더보기"}</button>
             </div>`;
           }).join("")}

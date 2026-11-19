@@ -624,6 +624,14 @@ button {
   display: block;
 }
 
+/* 메모 속 링크 (긴 주소는 줄바꿈해서 카드 밖으로 안 나가게) */
+.memo a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+
 .memo-toggle {
   margin-top: 2px;
   padding: 2px 0;
