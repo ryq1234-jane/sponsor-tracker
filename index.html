@@ -44,7 +44,7 @@
           </svg>
         </button>
         <button type="button" class="btn btn-primary" id="addButton">+ 새 협찬</button>
-        <button type="button" class="btn btn-ghost" id="logoutButton">로그아웃</button>
+        <button type="button" class="btn btn-ghost logout-top" data-logout>로그아웃</button>
       </div>
     </header>
 
@@ -69,6 +69,11 @@
         <!-- 목록 (리뷰 마감일 가까운 순) -->
         <main class="list" id="list"></main>
         <p class="empty" id="emptyMessage" hidden></p>
+
+        <!-- 휴대폰: 로그아웃은 목록 맨 아래 가운데 (PC는 위쪽 오른쪽) -->
+        <div class="logout-bottom">
+          <button type="button" class="btn btn-ghost" data-logout>로그아웃</button>
+        </div>
       </div>
     </div>
   </div>

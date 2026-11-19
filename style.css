@@ -1148,8 +1148,27 @@ dialog::backdrop {
   font-size: 0.95rem;
 }
 
+/* 로그아웃: 휴대폰·좁은 화면은 목록 맨 아래 가운데, PC는 위쪽 오른쪽 */
+.logout-bottom {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.topbar .logout-top {
+  display: none;
+}
+
 /* ===== PC (넓은 화면): 왼쪽 달력 + 오른쪽 목록 ===== */
 @media (min-width: 1024px) {
+  .topbar .logout-top {
+    display: inline-block;
+  }
+
+  .logout-bottom {
+    display: none;
+  }
+
   .app {
     max-width: 1140px;
   }

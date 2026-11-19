@@ -246,7 +246,8 @@ authForm.addEventListener("submit", async (e) => {
   // 성공하면 아래 onAuthStateChange가 화면을 바꿔줌
 });
 
-$("logoutButton").addEventListener("click", () => db.auth.signOut());
+// 로그아웃 버튼: PC는 위쪽, 휴대폰은 목록 맨 아래 (둘 다 같은 동작)
+document.querySelectorAll("[data-logout]").forEach((b) => b.addEventListener("click", () => db.auth.signOut()));
 
 // 로그인 상태에 따라 화면 전환
 function showView(session) {
