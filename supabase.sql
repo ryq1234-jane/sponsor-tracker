@@ -88,3 +88,23 @@ create policy "본인 것만 삭제" on public.sponsorships
 -- 웹사이트(로그인한 사용자)가 이 테이블을 쓸 수 있게 허용. 로그인 안 한 사람(anon)은 접근 불가.
 grant select, insert, update, delete on public.sponsorships to authenticated;
 revoke all on public.sponsorships from anon;
+
+-- 회원 탈퇴: 로그인한 "본인" 계정과 협찬 기록만 지우는 함수
+-- (사이트에서 db.rpc("delete_my_account") 로 부름. 다른 사람 계정은 지울 수 없음)
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null then
+    raise exception '로그인이 필요합니다';
+  end if;
+  delete from public.sponsorships where user_id = auth.uid();
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

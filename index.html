@@ -131,6 +131,7 @@
         <div class="calendar cal-card" id="calendarSide"></div>
         <div class="logout-side">
           <button type="button" class="btn btn-ghost" data-logout>로그아웃</button>
+          <button type="button" class="btn btn-ghost withdraw-link" data-withdraw>회원 탈퇴</button>
         </div>
       </aside>
 
@@ -153,6 +154,7 @@
         <!-- 휴대폰: 로그아웃은 목록 맨 아래 가운데 (PC는 왼쪽 달력 밑) -->
         <div class="logout-bottom">
           <button type="button" class="btn btn-ghost" data-logout>로그아웃</button>
+          <button type="button" class="btn btn-ghost withdraw-link" data-withdraw>회원 탈퇴</button>
         </div>
       </div>
     </div>
@@ -266,6 +268,24 @@
         <button type="button" class="btn btn-ghost" id="editCancel">취소</button>
         <button type="submit" class="btn btn-primary" id="saveButton">저장</button>
       </footer>
+    </form>
+  </dialog>
+
+  <!-- 회원 탈퇴 확인 창 -->
+  <dialog id="withdrawDialog" class="confirm withdraw">
+    <form id="withdrawForm" method="dialog">
+      <h2>회원 탈퇴</h2>
+      <p>탈퇴하시면 등록하신 협찬 기록과 메모가 <b>모두 삭제되며, 되돌릴 수 없습니다.</b></p>
+      <label class="field">
+        <span>계속하시려면 아래 칸에 <b>탈퇴</b>라고 입력해 주세요.</span>
+        <input type="text" name="word" autocomplete="off" placeholder="탈퇴">
+      </label>
+      <p class="message" hidden></p>
+      <div class="dialog-foot">
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost" id="withdrawCancel">취소</button>
+        <button type="submit" class="btn btn-danger" id="withdrawYes" disabled>탈퇴하기</button>
+      </div>
     </form>
   </dialog>
 

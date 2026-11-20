@@ -959,6 +959,36 @@ dialog::backdrop {
   border-top: none;
 }
 
+/* 회원 탈퇴: 로그아웃 옆의 작은 글씨 버튼 */
+.withdraw-link {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #9ca3af;
+}
+
+/* 회원 탈퇴 확인 창 */
+.withdraw form {
+  padding: 22px 20px 0;
+}
+
+.withdraw h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+}
+
+.withdraw p:not(.message) {
+  padding: 0 0 14px;
+  word-break: keep-all;
+}
+
+.withdraw p b {
+  color: var(--overdue);
+}
+
+.withdraw .dialog-foot {
+  padding: 4px 0 16px;
+}
+
 /* 알림 메시지 */
 .toast {
   position: fixed;

@@ -324,6 +324,42 @@ function handleLinkError() {
 // 로그아웃 버튼: PC는 달력 밑, 휴대폰은 목록 맨 아래 (둘 다 같은 동작)
 document.querySelectorAll("[data-logout]").forEach((b) => b.addEventListener("click", () => db.auth.signOut()));
 
+// ----- 회원 탈퇴 -----
+// Supabase의 delete_my_account 함수가 "지금 로그인한 본인" 계정과 협찬 기록을 지움
+const withdrawDialog = $("withdrawDialog");
+const withdrawForm = $("withdrawForm");
+const WITHDRAW_WORD = "탈퇴";
+
+document.querySelectorAll("[data-withdraw]").forEach((b) => b.addEventListener("click", () => {
+  withdrawForm.reset();
+  $("withdrawYes").disabled = true;
+  withdrawForm.querySelector(".message").hidden = true;
+  withdrawDialog.showModal();
+}));
+
+// "탈퇴"를 정확히 입력해야 버튼이 눌림 (실수 방지)
+withdrawForm.elements.word.addEventListener("input", (e) => {
+  $("withdrawYes").disabled = e.target.value.trim() !== WITHDRAW_WORD;
+});
+
+$("withdrawCancel").addEventListener("click", () => withdrawDialog.close());
+
+withdrawForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (withdrawForm.elements.word.value.trim() !== WITHDRAW_WORD) return;
+  const button = $("withdrawYes");
+  button.disabled = true;
+  const { error } = await db.rpc("delete_my_account");
+  if (error) {
+    button.disabled = false;
+    return showFormMessage(withdrawForm, "탈퇴하지 못했어요: " + friendlyError(error));
+  }
+  withdrawDialog.close();
+  await db.auth.signOut({ scope: "local" }); // 계정이 이미 지워졌으니 이 기기의 로그인 정보만 정리
+  window.history?.replaceState(null, "", siteUrl());
+  showToast("탈퇴가 완료되었습니다. 그동안 이용해 주셔서 감사합니다.");
+});
+
 // 로그인 상태에 따라 화면 전환
 function showView(session) {
   // 재설정 링크로 들어온 경우: 로그인은 됐지만 먼저 새 비밀번호 화면
