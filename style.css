@@ -232,6 +232,24 @@ button {
   text-decoration: none;
 }
 
+/* 만든 사람 표기 (화면 맨 아래 작은 글씨) */
+.credit {
+  margin: 28px 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: #b0b5bd;
+}
+
+/* 로그인 화면: 카드 아래에 표기가 오도록 세로로 쌓기 */
+.auth {
+  flex-direction: column;
+}
+
+.auth .credit {
+  margin-top: 20px;
+}
+
 /* ===== 메인 화면 ===== */
 .app {
   max-width: 760px;
