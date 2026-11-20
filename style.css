@@ -197,16 +197,9 @@ button {
   font-size: 1.4rem;
 }
 
-/* 제목 글씨: 부드러운 명조체(고운바탕). 못 불러오면 기본 글씨로 */
+/* 제목 글씨: 기본 글씨체, 색만 "+ 새 협찬" 버튼과 같은 파란색 */
 .brand {
-  font-family: "Gowun Batang", "Pretendard", "Malgun Gothic", serif;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--primary); /* "+ 새 협찬" 버튼과 같은 파란색 */
-}
-
-.auth-card h1.brand {
-  font-size: 1.55rem;
+  color: var(--primary);
 }
 
 .auth-card .muted {
@@ -1465,7 +1458,7 @@ dialog::backdrop {
   z-index: 1;
   margin: 0;
   font-size: 1.25rem;
-  font-weight: 800;
+  font-weight: 400; /* 얇게 */
   color: #fff;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
