@@ -358,10 +358,11 @@ button {
   cursor: pointer;
 }
 
+/* 선택한 필터: 하늘색 #92EEFF (사용자 지정). 밝은 바탕이라 글씨는 진하게 */
 .filters button.active {
-  color: #fff;
-  background: var(--text);
-  border-color: var(--text);
+  color: var(--text);
+  background: #92EEFF;
+  border-color: #92EEFF;
 }
 
 /* ===== 카드 ===== */
