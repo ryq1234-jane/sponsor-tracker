@@ -21,6 +21,12 @@
   box-sizing: border-box;
 }
 
+/* 스크롤바 자리를 항상 비워 둠: 필터를 바꿔 목록 길이가 달라져도
+   스크롤바가 생겼다 없어지면서 화면이 좌우로 흔들리지 않게 */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
