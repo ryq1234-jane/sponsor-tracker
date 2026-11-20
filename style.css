@@ -1,5 +1,7 @@
 /* ===== 색과 기본 설정 ===== */
 :root {
+  /* 필터 메뉴·단계 버튼·펼친 목록 글씨를 조금 더 연하게 하나로 (사용자 요청) */
+  --soft-text: #8A8F98;
   /* 체크된 단계 버튼(✓)과 그 아래 펼친 목록 바탕 (사용자 지정) */
   --chip-on: #B4FE98;
   /* 체크 안 된 버튼·펼친 목록 바탕: 흰색 위에 옅은 회색 (분홍 카드 위에서도 같은 색) */
@@ -353,7 +355,7 @@ button {
   padding: 8px 14px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--soft-text);
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -487,7 +489,7 @@ button {
   font-size: 0.85rem;
   font-weight: 400; /* 협찬·선정·수령·리뷰 글씨는 굵지 않게 */
   text-align: center;
-  color: var(--muted);
+  color: var(--soft-text);
   background: var(--chip-off);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -498,7 +500,7 @@ button {
 }
 
 .chip.on {
-  color: var(--muted); /* 글씨색은 체크 안 된 버튼(리뷰)과 같게 */
+  color: var(--soft-text); /* 글씨색은 체크 안 된 버튼(리뷰)과 같게 */
   background: var(--chip-on);
   border-color: var(--line-strong);
 }
@@ -574,6 +576,7 @@ button {
   align-items: center;
   gap: 2px 6px;
   font-size: 0.85rem;
+  color: var(--soft-text);
 }
 
 .post-list li > :nth-child(n + 3) {
@@ -604,7 +607,7 @@ button {
 }
 
 .post-list li.done .post-name {
-  color: var(--muted);
+  color: var(--soft-text);
   text-decoration: line-through;
 }
 
@@ -630,18 +633,22 @@ button {
     display: none;
   }
 
+  .post-list.apply-list li:not(.done) .post-name {
+    opacity: 0.5;
+  }
+
   .post-list li > :nth-child(n + 3) {
     padding-left: 0;
   }
 }
 
 .post-list.apply-list li .post-name {
-  color: var(--muted);
+  color: var(--soft-text);
 }
 
 .post-list.apply-list li.done .post-name {
-  color: var(--text);
-  font-weight: 400; /* 굵지 않게 (체크한 것은 진한 글씨색으로 구분) */
+  color: var(--soft-text);
+  font-weight: 400; /* 체크 여부는 체크박스로 구분 (휴대폰은 아래에서 흐림으로) */
   text-decoration: none;
 }
 
@@ -649,7 +656,7 @@ button {
   flex-shrink: 0;
   font-size: 0.8rem;
   font-weight: 400;
-  color: var(--text);
+  color: var(--soft-text);
   text-decoration: none;
 }
 
@@ -1022,7 +1029,7 @@ dialog::backdrop {
 .apply-amount {
   font-size: 0.85rem;
   font-weight: 400;
-  color: var(--text);
+  color: var(--soft-text);
 }
 
 .review-block .posts-edit {
