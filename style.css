@@ -2,33 +2,37 @@
 :root {
   /* 체크 안 된 버튼·펼친 목록 바탕: 흰색 위에 옅은 회색 (분홍 카드 위에서도 같은 색) */
   --chip-off: linear-gradient(rgba(104, 109, 118, 0.07), rgba(104, 109, 118, 0.07)), #FFFFFF;
-  /* 받은 팔레트 */
-  --pink: #FFCFDF;
-  --yellow: #FEFDCA;
-  --green: #E0F9B5;
-  --sky: #92EEFF;   /* 파란 계열은 모두 이 색 하나로 (사용자 지정) */
+  /* 무채색 단계 (밝은 것 → 진한 것) */
+  --gray-50: #F4F4F4;   /* 페이지 바탕, 목록·일정 줄 바탕 */
+  --gray-100: #EDEDED;  /* 마감 임박(옅게) */
+  --gray-200: #E4E4E4;  /* 완료·체크, 배송 대기, 기본 프로필 바탕 */
+  --gray-300: #D6D7D9;  /* 마감 지남, 삭제·오류 */
+  --gray-500: #A9ACB1;  /* 마감 지남 카드 왼쪽 줄 */
   --white: #FFFFFF;
+  --on-primary: #FFFFFF; /* 진한 버튼 위 글씨 */
   --text: #373A40;   /* 진한 글씨 */
   --muted: #686D76;  /* 연한 글씨 */
 
   /* 역할별로 배치 */
-  --bg: var(--yellow);            /* 페이지 바탕 */
+  --bg: var(--gray-50);           /* 페이지 바탕 */
+  --yellow: var(--gray-50);       /* (예전 크림 자리) 목록·일정 줄 바탕 */
   --card: var(--white);           /* 카드·입력칸 */
   --line: rgba(104, 109, 118, 0.2);        /* 테두리 (연한 글씨색을 옅게) */
   --line-strong: rgba(104, 109, 118, 0.35);
   --subtle: rgba(104, 109, 118, 0.07);     /* 옅은 회색 바탕 */
   --hover: rgba(104, 109, 118, 0.1);
   --faint: rgba(104, 109, 118, 0.4);
-  --primary: var(--sky);          /* 주요 버튼·선택 */
-  --primary-soft: var(--sky);
-  --soon: var(--pink);            /* 마감 임박 */
-  --soon-soft: rgba(255, 207, 223, 0.55);
-  --overdue: var(--pink);         /* 마감 지남·삭제·오류 */
-  --overdue-soft: var(--pink);
-  --done: var(--green);           /* 완료·체크 */
-  --done-soft: var(--green);
-  --visit: var(--sky);            /* 배송 대기 */
-  --visit-soft: var(--sky);
+  --primary: var(--text);         /* 주요 버튼·선택한 날: 진한 회색 + 흰 글씨 */
+  --primary-soft: var(--gray-200);
+  --soon: var(--gray-300);        /* 마감 임박 (카드 왼쪽 줄) */
+  --soon-soft: var(--gray-100);
+  --overdue: var(--gray-500);     /* 마감 지남 (카드 왼쪽 줄) */
+  --overdue-soft: var(--gray-300);
+  --done: var(--gray-200);        /* 완료·체크 */
+  --done-soft: var(--gray-200);
+  --visit: var(--text);           /* 배송 대기 */
+  --visit-soft: var(--gray-200);
+  --pink: var(--gray-300);        /* (예전 분홍 자리) 마감 지남 숫자 상자 */
 }
 
 * {
@@ -77,7 +81,7 @@ button {
 }
 
 .btn-primary {
-  color: var(--text);
+  color: var(--on-primary);
   background: var(--primary);
 }
 
@@ -294,7 +298,7 @@ button {
   margin: 0 -16px;
   padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
-  background: rgba(254, 253, 202, 0.92);
+  background: rgba(244, 244, 244, 0.92);
   backdrop-filter: blur(8px);
 }
 
@@ -375,7 +379,7 @@ button {
 }
 
 .card.is-soon { border-left-color: var(--soon); }
-.card.is-overdue { border-left-color: var(--overdue); background: linear-gradient(rgba(255, 207, 223, 0.2), rgba(255, 207, 223, 0.2)), var(--card); }
+.card.is-overdue { border-left-color: var(--overdue); background: linear-gradient(rgba(104, 109, 118, 0.04), rgba(104, 109, 118, 0.04)), var(--card); }
 .card.stage-done,
 .card.stage-rejected { opacity: 0.65; }
 
@@ -828,7 +832,7 @@ button {
 .post-row input[type="checkbox"] {
   width: 20px;
   height: 20px;
-  accent-color: var(--done);
+  accent-color: var(--primary);
 }
 
 @media (max-width: 560px) {
@@ -1176,12 +1180,12 @@ dialog::backdrop {
 
 .cal-day.selected,
 .cal-day.selected:hover {
-  color: var(--text);
+  color: var(--on-primary);
   background: var(--primary);
 }
 
 .cal-day.selected .num {
-  color: var(--text);
+  color: var(--on-primary);
 }
 
 .cal-dots {
@@ -1490,7 +1494,7 @@ dialog::backdrop {
 /* 휴대폰 필터 줄 오른쪽 "+ 새 협찬" */
 .filters .filter-add {
   margin-left: auto;
-  color: var(--text);
+  color: var(--on-primary);
   background: var(--primary);
   border-color: var(--primary);
 }
@@ -1750,7 +1754,7 @@ dialog::backdrop {
 /* 주요 버튼: 하늘색 바탕은 그대로, 마우스를 올리면 살짝 진하게 */
 .btn-primary:hover,
 .filters .filter-add:hover {
-  filter: brightness(0.95);
+  opacity: 0.88;
 }
 
 /* 요약 숫자: 상태가 있으면 상자에 옅은 색 */
@@ -1772,4 +1776,9 @@ dialog::backdrop {
   text-decoration-color: var(--primary);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
+}
+
+/* 진한 "리뷰 마감" 태그 위 글씨는 흰색 */
+.ev-tag.ev-due {
+  color: var(--on-primary);
 }
