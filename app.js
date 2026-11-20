@@ -15,7 +15,6 @@ const resetForm = $("resetForm");
 const appView = $("appView");
 const list = $("list");
 const emptyMessage = $("emptyMessage");
-const summary = $("summary");
 const filterButtons = document.querySelectorAll("#filters [data-filter]"); // 필터 줄의 "+ 새 협찬"은 제외
 
 const editDialog = $("editDialog");
@@ -785,8 +784,9 @@ function cardHtml(it) {
     </article>`;
 }
 
-function renderSummary() {
-  const active = items.filter((it) => !isClosed(it));
+// 요약 숫자 4개 (달력 안 "리뷰 마감 · 완료" 아래 작은 상자)
+function summaryHtml(list) {
+  const active = list.filter((it) => !isClosed(it));
   const soon = active.filter((it) => {
     const d = daysFromToday(it.review_due);
     return d !== null && d >= 0 && d <= 3;
@@ -794,7 +794,7 @@ function renderSummary() {
   const overdue = active.filter((it) => daysFromToday(it.review_due) < 0).length;
   const waiting = active.filter((it) => it.selected && !it.received).length;
 
-  summary.innerHTML = `
+  return `
     <div class="stat"><b>${active.length}</b><span>진행 중</span></div>
     <div class="stat ${waiting ? "has-waiting" : ""}"><b>${waiting}</b><span>배송 대기</span></div>
     <div class="stat ${soon ? "has-soon" : ""}"><b>${soon}</b><span>3일 내 마감</span></div>
@@ -831,7 +831,7 @@ function eventClass(ev) {
   return d < 0 ? "ev-overdue" : d <= 3 ? "ev-soon" : "ev-due";
 }
 
-function calendarHtml(list, year, month, selected) {
+function calendarHtml(list, year, month, selected, withSummary = false) {
   const events = calendarEvents(list);
   const today = todayStr();
   const offset = new Date(year, month, 1).getDay(); // 1일이 무슨 요일인지
@@ -884,6 +884,7 @@ function calendarHtml(list, year, month, selected) {
       <span><i class="ev-due"></i>리뷰 마감</span>
       <span><i class="ev-done"></i>완료</span>
     </div>
+    ${withSummary ? `<div class="mini-summary">${summaryHtml(list)}</div>` : ""}
     <div class="cal-list">
       <h3>${formatDate(selected)}</h3>
       <ul>${dayList}</ul>
@@ -891,7 +892,8 @@ function calendarHtml(list, year, month, selected) {
 }
 
 function renderCalendars() {
-  const html = calendarHtml(items, calYear, calMonth, calSelected);
+  // 요약 숫자는 달력 안에 (PC 왼쪽 달력, 휴대폰 달력 창 둘 다)
+  const html = calendarHtml(items, calYear, calMonth, calSelected, true);
   calendarSide.innerHTML = html;
   calendarSheet.innerHTML = html;
 }
@@ -942,7 +944,6 @@ window.matchMedia?.("(min-width: 1024px)").addEventListener?.("change", (e) => {
 });
 
 function render() {
-  renderSummary();
   renderCalendars();
 
   const shown = sortItems(items.filter(matchesFilter));

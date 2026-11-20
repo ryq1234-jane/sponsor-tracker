@@ -309,13 +309,6 @@ button {
   gap: 4px;
 }
 
-/* 요약 숫자 */
-.summary {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 4px 0 14px;
-}
 
 .stat {
   display: flex;
@@ -1227,6 +1220,29 @@ dialog::backdrop {
 
 .cal-day.selected .cal-dots i {
   box-shadow: 0 0 0 1.5px #fff;
+}
+
+/* PC 달력 안 작은 요약 숫자 (가로 4칸) */
+.mini-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.mini-summary .stat {
+  gap: 1px;
+  padding: 7px 2px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.mini-summary .stat b {
+  font-size: 1rem;
+}
+
+.mini-summary .stat span {
+  font-size: 0.66rem;
 }
 
 /* 고른 날짜의 일정 목록 */
