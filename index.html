@@ -127,8 +127,8 @@
             <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>
           </svg>
         </button>
-        <!-- 휴대폰: 오른쪽 위 마이페이지 -->
-        <div class="mypage mypage-top only-mobile">
+        <!-- 오른쪽 위 MY PAGE (PC·휴대폰 공통) -->
+        <div class="mypage mypage-top">
           <button type="button" class="mypage-btn" data-mypage-toggle aria-expanded="false">
             <span>MY PAGE</span>
             <span class="caret" aria-hidden="true">▾</span>
@@ -138,26 +138,14 @@
             <button type="button" data-logout>로그아웃</button>
           </div>
         </div>
-        <!-- PC: 오른쪽 위 + 새 협찬 (휴대폰은 필터 줄 오른쪽에) -->
-        <button type="button" class="btn btn-primary only-pc" data-add>+ 새 협찬</button>
       </div>
     </header>
 
     <div class="app-body">
-      <!-- PC 왼쪽: 프로필 → 일정 달력 → 마이페이지 → 만든 사람 -->
+      <!-- PC 왼쪽: 프로필 → 일정 달력 → 만든 사람 -->
       <aside class="side" aria-label="프로필과 일정 달력">
         <div class="profile-card" id="profileSide"></div> <!-- script에서 채움 -->
         <div class="calendar cal-card" id="calendarSide"></div>
-        <div class="mypage mypage-side">
-          <button type="button" class="mypage-btn" data-mypage-toggle aria-expanded="false">
-            <span>MY PAGE</span>
-            <span class="caret" aria-hidden="true">▾</span>
-          </button>
-          <div class="mypage-menu" hidden>
-            <button type="button" data-open-info>나의 정보</button>
-            <button type="button" data-logout>로그아웃</button>
-          </div>
-        </div>
         <p class="credit"><a href="https://www.instagram.com/sooe.home/" target="_blank" rel="noopener noreferrer">made by @sooe.home</a></p>
       </aside>
 
@@ -174,7 +162,7 @@
           <button type="button" data-filter="applied">선정 대기</button>
           <button type="button" data-filter="done">완료</button>
           <button type="button" data-filter="all">전체</button>
-          <button type="button" class="filter-add only-mobile" data-add>+ 새 협찬</button>
+          <button type="button" class="filter-add" data-add>+ 새 협찬</button>
         </nav>
 
         <!-- 목록 (리뷰 마감일 가까운 순) -->

@@ -259,7 +259,7 @@ button {
 }
 
 .auth .credit,
-.mypage + .credit {
+.side .credit {
   margin-top: 18px;
 }
 
@@ -1346,7 +1346,7 @@ dialog::backdrop {
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--text);
+  color: #4b5563; /* 진회색 */
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1390,10 +1390,6 @@ dialog::backdrop {
 
 .mypage-menu button:hover {
   background: #f1f2f4;
-}
-
-.mypage-side {
-  margin-top: 14px;
 }
 
 .mobile-foot {
