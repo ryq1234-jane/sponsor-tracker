@@ -1495,8 +1495,8 @@ dialog::backdrop {
 .filters .filter-add {
   margin-left: auto;
   color: var(--on-primary);
-  background: var(--primary);
-  border-color: var(--primary);
+  background: #30AFFF; /* "+ 새 협찬"만 포인트 파랑 (사용자 지정) */
+  border-color: #30AFFF;
 }
 
 /* 휴대폰 상단 프로필: 제목처럼 가로로 긴 사진 */
