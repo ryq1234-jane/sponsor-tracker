@@ -197,6 +197,17 @@ button {
   font-size: 1.4rem;
 }
 
+/* 제목 글씨: 부드러운 명조체(고운바탕). 못 불러오면 기본 글씨로 */
+.brand {
+  font-family: "Gowun Batang", "Pretendard", "Malgun Gothic", serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.auth-card h1.brand {
+  font-size: 1.55rem;
+}
+
 .auth-card .muted {
   margin: 0 0 24px;
   font-size: 0.9rem;
@@ -1622,6 +1633,13 @@ dialog::backdrop {
 
 /* ===== PC (넓은 화면): 왼쪽 달력 + 오른쪽 목록 ===== */
 @media (min-width: 1024px) {
+  /* 제목을 왼쪽 달력(320px) 가운데에 맞춤 */
+  .topbar h1 {
+    width: 320px;
+    font-size: 1.3rem;
+    text-align: center;
+  }
+
   .mobile-foot {
     display: none; /* PC는 마이페이지·만든 사람이 왼쪽 달력 밑에 */
   }
