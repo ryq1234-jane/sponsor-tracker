@@ -347,9 +347,10 @@ document.addEventListener("click", (e) => {
 });
 
 // ----- 프로필 (사진 + 닉네임) -----
-// 사진은 400×400 정사각형 JPG로 줄여서 profiles 표에 글자(data URL)로 저장 (보통 20~40KB)
+// 사진은 900×900 정사각형 WEBP(안 되면 JPG)로 줄여서 profiles 표에 글자(data URL)로 저장 (보통 20~40KB)
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 원본 사진은 5MB까지
-const AVATAR_SIZE = 400; // PC에서 크게, 휴대폰에서 가로로 잘라 보여도 선명하게
+const AVATAR_SIZE = 900; // 휴대폰 상단에 가로로 크게 보여도 깨지지 않을 크기
+const MAX_AVATAR_CHARS = 280000; // DB 한도(300,000자) 안쪽으로 — 보통 100~200KB
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 const PERSON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M2.5 24c0-5.6 4.3-9.5 9.5-9.5s9.5 3.9 9.5 9.5z"/></svg>`;
@@ -371,21 +372,36 @@ function checkAvatarFile(file) {
   return null;
 }
 
-// 사진을 가운데 기준 정사각형으로 자르고 240×240 으로 줄이기
+// 사진을 가운데 기준 정사각형으로 자르고 900×900 으로 줄이기
+// 큰 사진을 한 번에 확 줄이면 깨져 보여서, 절반씩 여러 번 나눠 줄임
 function resizeToSquare(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      const side = Math.min(img.naturalWidth, img.naturalHeight);
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = AVATAR_SIZE;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#fff"; // 투명한 PNG는 흰 배경으로
-      ctx.fillRect(0, 0, AVATAR_SIZE, AVATAR_SIZE);
-      ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL("image/jpeg", 0.82));
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const target = Math.min(AVATAR_SIZE, side); // 원본이 작으면 억지로 키우지 않음
+
+      // 1) 가운데 정사각형 잘라내기 (투명한 PNG는 흰 배경)
+      let canvas = document.createElement("canvas");
+      canvas.width = canvas.height = side;
+      let ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, side, side);
+      ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, side, side);
+
+      // 2) 목표 크기의 2배보다 크면 절반씩 줄이기 → 마지막에 목표 크기로
+      let size = side;
+      while (size / 2 >= target) {
+        size = Math.round(size / 2);
+        canvas = shrink(canvas, size);
+      }
+      if (size !== target) canvas = shrink(canvas, target);
+
+      const dataUrl = encodeAvatar(canvas);
+      if (dataUrl) resolve(dataUrl);
+      else reject(new Error("사진을 저장할 수 있는 크기로 줄이지 못했어요. 다른 사진을 골라 주세요."));
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
@@ -393,6 +409,28 @@ function resizeToSquare(file) {
     };
     img.src = url;
   });
+}
+
+function shrink(source, size) {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(source, 0, 0, size, size);
+  return canvas;
+}
+
+// WEBP(같은 화질에 더 작은 용량)로, 안 되는 브라우저는 JPG로.
+// 한도를 넘으면 화질을 조금씩 낮춰서 맞춤
+function encodeAvatar(canvas) {
+  const webp = canvas.toDataURL("image/webp", 0.5).startsWith("data:image/webp");
+  const type = webp ? "image/webp" : "image/jpeg";
+  for (const quality of [0.9, 0.85, 0.8, 0.74, 0.68, 0.6]) {
+    const dataUrl = canvas.toDataURL(type, quality);
+    if (dataUrl.length <= MAX_AVATAR_CHARS) return dataUrl;
+  }
+  return null;
 }
 
 function profileCardHtml(p) {
@@ -423,9 +461,32 @@ function renderProfile() {
 
 renderProfile(); // 불러오기 전에는 기본 이미지로
 
+// 사진은 이 브라우저에 기억해 두고(updated_at 이 같으면 그대로 사용), 바뀌었을 때만 다시 받음
+// → 사진이 커져도 매번 내려받지 않아서 데이터 사용량이 늘지 않음
+const profileCacheKey = (userId) => `profile-photo:${userId}`;
+
+function readPhotoCache(userId) {
+  try { return JSON.parse(localStorage.getItem(profileCacheKey(userId))); } catch { return null; }
+}
+
+function writePhotoCache(userId, updatedAt, avatar) {
+  try { localStorage.setItem(profileCacheKey(userId), JSON.stringify({ updatedAt, avatar })); } catch { /* 저장 못 해도 괜찮음 */ }
+}
+
 async function loadProfile(userId) {
-  const { data } = await db.from("profiles").select("nickname, avatar").eq("id", userId).maybeSingle();
-  profile = { nickname: data?.nickname || "", avatar: data?.avatar || null };
+  const { data } = await db.from("profiles").select("nickname, updated_at").eq("id", userId).maybeSingle();
+  let avatar = null;
+  if (data) {
+    const cached = readPhotoCache(userId);
+    if (cached && cached.updatedAt === data.updated_at) {
+      avatar = cached.avatar;
+    } else {
+      const { data: photo } = await db.from("profiles").select("avatar").eq("id", userId).maybeSingle();
+      avatar = photo?.avatar || null;
+      writePhotoCache(userId, data.updated_at, avatar);
+    }
+  }
+  profile = { nickname: data?.nickname || "", avatar };
   renderProfile();
 }
 
@@ -475,8 +536,11 @@ $("avatarReset").addEventListener("click", () => {
 
 onAuthSubmit(profileForm, async (f) => {
   const nickname = f.nickname.value.trim().slice(0, 20);
-  const { error } = await db.from("profiles").upsert({ id: currentUserId, nickname: nickname || null, avatar: formAvatar });
+  const { data, error } = await db.from("profiles")
+    .upsert({ id: currentUserId, nickname: nickname || null, avatar: formAvatar })
+    .select("updated_at").single();
   if (error) throw error;
+  writePhotoCache(currentUserId, data.updated_at, formAvatar);
   profile = { nickname, avatar: formAvatar };
   renderProfile();
   showFormMessage(profileForm, "프로필을 저장했어요.", false);

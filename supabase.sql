@@ -109,7 +109,7 @@ $$;
 revoke all on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
 
--- 프로필: 닉네임 + 사진(240×240 JPG를 글자로 바꾼 data URL, 최대 약 300KB)
+-- 프로필: 닉네임 + 사진(900×900 WEBP/JPG를 글자로 바꾼 data URL, 최대 약 300KB)
 -- 탈퇴하면(auth.users 삭제) 프로필도 함께 지워짐
 create table if not exists public.profiles (
   id          uuid primary key default auth.uid() references auth.users (id) on delete cascade,
