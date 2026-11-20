@@ -279,7 +279,7 @@ onAuthSubmit(signupForm, async (f) => {
   if (error) throw error;
   if (!data.session) {
     // Supabase에서 "가입 시 이메일 인증"이 켜져 있으면 메일 확인 후 로그인
-    showFormMessage(signupForm, "가입 확인 메일을 보냈어요. 메일의 링크를 누르면 가입이 끝나요.", false);
+    showFormMessage(signupForm, "가입 확인 메일을 보냈어요. 메일의 링크를 누르면 가입이 끝나요. 메일이 안 보이면 스팸함도 확인해 주세요.", false);
   }
 });
 
