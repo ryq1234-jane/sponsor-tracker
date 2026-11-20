@@ -1,5 +1,7 @@
 /* ===== 색과 기본 설정 ===== */
 :root {
+  /* 체크된 단계 버튼(✓)과 그 아래 펼친 목록 바탕 (사용자 지정) */
+  --chip-on: #ECEE81;
   /* 체크 안 된 버튼·펼친 목록 바탕: 흰색 위에 옅은 회색 (분홍 카드 위에서도 같은 색) */
   --chip-off: linear-gradient(rgba(104, 109, 118, 0.07), rgba(104, 109, 118, 0.07)), #FFFFFF;
   /* 무채색 단계 (밝은 것 → 진한 것) */
@@ -496,8 +498,8 @@ button {
 }
 
 .chip.on {
-  color: var(--text);
-  background: var(--done-soft);
+  color: var(--muted); /* 글씨색은 체크 안 된 버튼(리뷰)과 같게 */
+  background: var(--chip-on);
   border-color: var(--line-strong);
 }
 
@@ -542,7 +544,7 @@ button {
 
 /* 위 버튼이 체크된 상태(연두)면 목록도 연두 */
 .post-list.on {
-  background: var(--done-soft);
+  background: var(--chip-on);
   border-color: var(--line-strong);
 }
 
@@ -561,7 +563,7 @@ button {
 }
 
 .post-list.on::before {
-  background: var(--done-soft);
+  background: var(--chip-on);
   border-color: var(--line-strong);
 }
 
