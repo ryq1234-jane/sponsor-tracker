@@ -613,7 +613,8 @@ button {
 /* 메모 여러 개: 좌우로 밀어서 넘기기 */
 .memos {
   margin: 12px 0 0;
-  background: var(--yellow);
+  background: var(--white);
+  border: 1px solid var(--line); /* 흰 카드 위에서도 상자가 보이게 */
   border-radius: 8px;
   overflow: hidden;
 }
