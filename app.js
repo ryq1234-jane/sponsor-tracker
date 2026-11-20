@@ -449,8 +449,7 @@ function profileBannerHtml(p) {
     <div class="banner ${hasPhoto ? "" : "no-photo"}">
       ${hasPhoto ? avatarHtml(p.avatar) : `<span class="avatar avatar-banner">${PERSON_SVG}</span>`}
       <p class="banner-name ${p.nickname ? "" : "is-empty"}">${esc(p.nickname || "닉네임을 설정해 주세요")}</p>
-      <button type="button" class="profile-gear" data-open-info aria-label="프로필 설정">${GEAR_SVG}</button>
-    </div>`;
+    </div>`; // 휴대폰은 톱니바퀴 없음 (마이페이지 → 나의 정보에서 바꿈)
 }
 
 function renderProfile() {

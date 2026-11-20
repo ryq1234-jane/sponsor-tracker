@@ -1505,14 +1505,6 @@ dialog::backdrop {
   font-weight: 400;
 }
 
-.banner .profile-gear {
-  top: 10px;
-  right: 10px;
-  bottom: auto;
-  z-index: 2;
-  opacity: 1;
-}
-
 /* 사진이 없을 때: 흰 줄에 빈 사람 모양 + 닉네임 */
 .banner.no-photo {
   display: flex;
@@ -1539,11 +1531,6 @@ dialog::backdrop {
 .no-photo .banner-name.is-empty {
   font-size: 0.9rem;
   color: var(--muted);
-}
-
-.no-photo .profile-gear {
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 /* 화면 폭에 따라 보이는 것: 1024px 이상 PC / 미만 휴대폰·태블릿 */
