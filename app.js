@@ -455,7 +455,6 @@ function profileBannerHtml(p) {
 function renderProfile() {
   $("profileSide").innerHTML = profileCardHtml(profile);
   $("profileBanner").innerHTML = profileBannerHtml(profile);
-  document.querySelectorAll("[data-avatar]").forEach((el) => (el.innerHTML = avatarHtml(profile.avatar)));
 }
 
 renderProfile(); // 불러오기 전에는 기본 이미지로

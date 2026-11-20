@@ -1270,12 +1270,6 @@ dialog::backdrop {
   border-radius: 16px;
 }
 
-.avatar-xs {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-}
-
 /* PC 왼쪽 위 프로필 카드 */
 /* 흰 상자 없이 사진만: 달력 너비의 약 2/3 */
 .profile-card {
@@ -1371,9 +1365,10 @@ dialog::backdrop {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 14px 7px 8px;
-  font-size: 0.9rem;
+  padding: 8px 16px;
+  font-size: 0.85rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
   color: var(--text);
   background: var(--card);
   border: 1px solid var(--line);
@@ -1434,8 +1429,8 @@ dialog::backdrop {
 }
 
 .mypage-top .mypage-btn {
-  padding: 5px 10px 5px 5px;
-  font-size: 0.85rem;
+  padding: 7px 12px;
+  font-size: 0.8rem;
 }
 
 .mypage-top .mypage-menu {
