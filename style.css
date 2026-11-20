@@ -1612,10 +1612,19 @@ dialog::backdrop {
     align-items: start;
   }
 
+  /* 위 막대 높이를 64px로 고정하고, 왼쪽 열이 "붙는" 위치도 똑같이 64px로.
+     (둘이 다르면 목록 길이에 따라 사진·달력이 위아래로 튀었음) */
+  .topbar {
+    height: 64px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
   .side {
     display: block;
     position: sticky;
-    top: 72px;
+    top: 64px;
+    padding-top: 4px; /* 오른쪽 요약 숫자와 윗줄 맞춤 */
   }
 
   .topbar .cal-btn {
