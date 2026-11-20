@@ -6,7 +6,7 @@
   --pink: #FFCFDF;
   --yellow: #FEFDCA;
   --green: #E0F9B5;
-  --sky: #A5DEE5;
+  --sky: #92EEFF;   /* 파란 계열은 모두 이 색 하나로 (사용자 지정) */
   --white: #FFFFFF;
   --text: #373A40;   /* 진한 글씨 */
   --muted: #686D76;  /* 연한 글씨 */
@@ -20,7 +20,7 @@
   --hover: rgba(104, 109, 118, 0.1);
   --faint: rgba(104, 109, 118, 0.4);
   --primary: var(--sky);          /* 주요 버튼·선택 */
-  --primary-soft: rgba(165, 222, 229, 0.4);
+  --primary-soft: var(--sky);
   --soon: var(--pink);            /* 마감 임박 */
   --soon-soft: rgba(255, 207, 223, 0.55);
   --overdue: var(--pink);         /* 마감 지남·삭제·오류 */
@@ -28,7 +28,7 @@
   --done: var(--green);           /* 완료·체크 */
   --done-soft: var(--green);
   --visit: var(--sky);            /* 배송 대기 */
-  --visit-soft: rgba(165, 222, 229, 0.4);
+  --visit-soft: var(--sky);
 }
 
 * {
