@@ -47,7 +47,7 @@ html {
 
 body {
   margin: 0;
-  font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   background: var(--bg);
   color: var(--text);
   -webkit-text-size-adjust: 100%;
