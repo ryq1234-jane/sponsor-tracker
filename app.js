@@ -328,7 +328,6 @@ document.querySelectorAll("[data-logout]").forEach((b) => b.addEventListener("cl
 // Supabase의 delete_my_account 함수가 "지금 로그인한 본인" 계정과 협찬 기록을 지움
 const withdrawDialog = $("withdrawDialog");
 const withdrawForm = $("withdrawForm");
-const WITHDRAW_WORD = "탈퇴";
 
 document.querySelectorAll("[data-withdraw]").forEach((b) => b.addEventListener("click", () => {
   withdrawForm.reset();
@@ -337,18 +336,29 @@ document.querySelectorAll("[data-withdraw]").forEach((b) => b.addEventListener("
   withdrawDialog.showModal();
 }));
 
-// "탈퇴"를 정확히 입력해야 버튼이 눌림 (실수 방지)
-withdrawForm.elements.word.addEventListener("input", (e) => {
-  $("withdrawYes").disabled = e.target.value.trim() !== WITHDRAW_WORD;
+// 비밀번호를 입력해야 버튼이 눌림
+withdrawForm.elements.password.addEventListener("input", (e) => {
+  $("withdrawYes").disabled = e.target.value === "";
 });
 
 $("withdrawCancel").addEventListener("click", () => withdrawDialog.close());
 
 withdrawForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (withdrawForm.elements.word.value.trim() !== WITHDRAW_WORD) return;
+  const password = withdrawForm.elements.password.value;
+  if (!password) return;
   const button = $("withdrawYes");
   button.disabled = true;
+
+  // 본인 확인: 지금 로그인한 이메일 + 입력한 비밀번호로 다시 로그인되는지 확인
+  const { data: { session } } = await db.auth.getSession();
+  const { error: authError } = await db.auth.signInWithPassword({ email: session?.user?.email, password });
+  if (authError) {
+    button.disabled = false;
+    const wrong = /Invalid login credentials/i.test(authError.message);
+    return showFormMessage(withdrawForm, wrong ? "비밀번호가 맞지 않아요." : friendlyError(authError));
+  }
+
   const { error } = await db.rpc("delete_my_account");
   if (error) {
     button.disabled = false;
