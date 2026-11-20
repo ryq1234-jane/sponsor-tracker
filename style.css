@@ -358,9 +358,9 @@ button {
   cursor: pointer;
 }
 
-/* 선택한 필터: 하늘색 #92EEFF (사용자 지정). 밝은 바탕이라 글씨는 진하게 */
+/* 선택한 필터: 하늘색 #92EEFF + 흰 글씨 (사용자 지정) */
 .filters button.active {
-  color: var(--text);
+  color: #fff;
   background: #92EEFF;
   border-color: #92EEFF;
 }
