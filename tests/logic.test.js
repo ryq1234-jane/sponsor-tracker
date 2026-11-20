@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, authScreenFromHash, friendlyError, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, authScreenFromHash, friendlyError, avatarHtml, checkAvatarFile, profileCardHtml, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -166,6 +166,19 @@ eq("로그인 실패", t.friendlyError({ message: "Invalid login credentials" })
 eq("같은 비밀번호로 변경", t.friendlyError({ message: "New password should be different from the old password." }), "지금 쓰는 비밀번호와 다른 비밀번호를 입력해 주세요.");
 eq("메일 너무 자주 요청", t.friendlyError({ message: "For security purposes, you can only request this after 42 seconds." }), "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.");
 eq("메일 발송 실패", t.friendlyError({ message: "Error sending recovery email" }), "메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
+
+// 프로필
+eq("사진 없으면 빈 사람 모양", /<svg/.test(t.avatarHtml(null)) && !/<img/.test(t.avatarHtml(null)), true);
+eq("저장된 사진은 이미지로", /<img src="data:image\/jpeg;base64,AAAA"/.test(t.avatarHtml("data:image/jpeg;base64,AAAA")), true);
+eq("이상한 주소는 사진으로 안 씀", /<img/.test(t.avatarHtml('javascript:alert(1)')) || /<img/.test(t.avatarHtml('data:image/jpeg;base64,AA" onerror="x')), false);
+eq("5MB 넘는 사진 막기", /너무 커요 \(6\.0MB\)/.test(t.checkAvatarFile({ type: "image/jpeg", size: 6 * 1024 * 1024 })), true);
+eq("5MB 이하 사진은 통과", t.checkAvatarFile({ type: "image/png", size: 5 * 1024 * 1024 }), null);
+eq("사진이 아닌 파일 막기", t.checkAvatarFile({ type: "application/pdf", size: 1000 }), "JPG, PNG, WEBP 사진만 올릴 수 있어요.");
+eq("아이폰 HEIC 막기", t.checkAvatarFile({ type: "image/heic", size: 1000 }), "JPG, PNG, WEBP 사진만 올릴 수 있어요.");
+const pc1 = t.profileCardHtml({ nickname: "", avatar: null });
+eq("닉네임 없으면 안내 문구", /profile-name is-empty">닉네임을 설정해 주세요/.test(pc1), true);
+eq("프로필에 톱니바퀴 버튼", /class="profile-gear" data-open-info/.test(pc1), true);
+eq("닉네임 표시 (안전하게)", /profile-name ">&lt;b&gt;수이/.test(t.profileCardHtml({ nickname: "<b>수이", avatar: null })), true);
 
 console.log(fail ? `\n${fail}개 실패` : "\n모두 통과");
 process.exit(fail ? 1 : 0);

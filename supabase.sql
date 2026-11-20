@@ -108,3 +108,34 @@ $$;
 
 revoke all on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- 프로필: 닉네임 + 사진(240×240 JPG를 글자로 바꾼 data URL, 최대 약 300KB)
+-- 탈퇴하면(auth.users 삭제) 프로필도 함께 지워짐
+create table if not exists public.profiles (
+  id          uuid primary key default auth.uid() references auth.users (id) on delete cascade,
+  nickname    text check (char_length(nickname) <= 20),
+  avatar      text check (avatar is null or (avatar like 'data:image/%' and length(avatar) <= 300000)),
+  updated_at  timestamptz not null default now()
+);
+
+drop trigger if exists profiles_touch on public.profiles;
+create trigger profiles_touch
+  before update on public.profiles
+  for each row execute function public.touch_updated_at();
+
+alter table public.profiles enable row level security;
+
+drop policy if exists "본인 프로필만 보기" on public.profiles;
+create policy "본인 프로필만 보기" on public.profiles
+  for select to authenticated using (auth.uid() = id);
+
+drop policy if exists "본인 프로필만 추가" on public.profiles;
+create policy "본인 프로필만 추가" on public.profiles
+  for insert to authenticated with check (auth.uid() = id);
+
+drop policy if exists "본인 프로필만 수정" on public.profiles;
+create policy "본인 프로필만 수정" on public.profiles
+  for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+
+grant select, insert, update on public.profiles to authenticated;
+revoke all on public.profiles from anon;

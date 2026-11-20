@@ -33,6 +33,8 @@ let items = []; // 불러온 협찬 목록
 let filter = "active"; // 지금 보고 있는 필터
 let editingId = null; // 수정 중인 항목 id (새로 만들 땐 null)
 let currentUserId = null;
+let currentEmail = "";
+let profile = { nickname: "", avatar: null }; // 내 프로필 (닉네임, 사진)
 // 메일의 "비밀번호 재설정" 링크로 들어왔는지 (주소 끝에 type=recovery 가 붙어 옴)
 let recoveryMode = /type=recovery/.test(window.location?.hash || "");
 
@@ -324,12 +326,173 @@ function handleLinkError() {
 // 로그아웃 버튼: PC는 달력 밑, 휴대폰은 목록 맨 아래 (둘 다 같은 동작)
 document.querySelectorAll("[data-logout]").forEach((b) => b.addEventListener("click", () => db.auth.signOut()));
 
+// ----- 마이페이지 메뉴 (나의 정보 / 로그아웃) -----
+function closeMypageMenus() {
+  document.querySelectorAll("[data-mypage-toggle]").forEach((btn) => {
+    btn.setAttribute("aria-expanded", "false");
+    btn.nextElementSibling.hidden = true;
+  });
+}
+
+document.querySelectorAll("[data-mypage-toggle]").forEach((btn) => btn.addEventListener("click", () => {
+  const menu = btn.nextElementSibling;
+  const open = menu.hidden;
+  menu.hidden = !open;
+  btn.setAttribute("aria-expanded", String(open));
+}));
+
+// 메뉴 밖을 누르면 메뉴 닫기
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".mypage")) closeMypageMenus();
+});
+
+// ----- 프로필 (사진 + 닉네임) -----
+// 사진은 240×240 정사각형 JPG로 줄여서 profiles 표에 글자(data URL)로 저장 (보통 20~40KB)
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 원본 사진은 5MB까지
+const AVATAR_SIZE = 240;
+const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+const PERSON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M2.5 24c0-5.6 4.3-9.5 9.5-9.5s9.5 3.9 9.5 9.5z"/></svg>`;
+const GEAR_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>`;
+
+// 저장된 사진이 있으면 사진, 없으면 빈 사람 모양
+function avatarHtml(src) {
+  return /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(src || "")
+    ? `<img src="${src}" alt="프로필 사진">`
+    : PERSON_SVG;
+}
+
+// 올리려는 사진 확인 (문제가 있으면 안내 문구, 괜찮으면 null)
+function checkAvatarFile(file) {
+  if (!AVATAR_TYPES.includes(file?.type)) return "JPG, PNG, WEBP 사진만 올릴 수 있어요.";
+  if (file.size > MAX_AVATAR_BYTES) {
+    return `사진 용량이 너무 커요 (${(file.size / 1024 / 1024).toFixed(1)}MB). 5MB 이하의 사진을 골라 주세요.`;
+  }
+  return null;
+}
+
+// 사진을 가운데 기준 정사각형으로 자르고 240×240 으로 줄이기
+function resizeToSquare(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = AVATAR_SIZE;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff"; // 투명한 PNG는 흰 배경으로
+      ctx.fillRect(0, 0, AVATAR_SIZE, AVATAR_SIZE);
+      ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("사진을 읽지 못했어요. 다른 사진을 골라 주세요."));
+    };
+    img.src = url;
+  });
+}
+
+function profileCardHtml(p) {
+  return `
+    <div class="profile-photo">
+      <span class="avatar avatar-lg">${avatarHtml(p.avatar)}</span>
+      <button type="button" class="profile-gear" data-open-info aria-label="프로필 설정">${GEAR_SVG}</button>
+    </div>
+    <p class="profile-name ${p.nickname ? "" : "is-empty"}">${esc(p.nickname || "닉네임을 설정해 주세요")}</p>`;
+}
+
+function renderProfile() {
+  $("profileSide").innerHTML = profileCardHtml(profile);
+  document.querySelectorAll("[data-avatar]").forEach((el) => (el.innerHTML = avatarHtml(profile.avatar)));
+}
+
+renderProfile(); // 불러오기 전에는 기본 이미지로
+
+async function loadProfile(userId) {
+  const { data } = await db.from("profiles").select("nickname, avatar").eq("id", userId).maybeSingle();
+  profile = { nickname: data?.nickname || "", avatar: data?.avatar || null };
+  renderProfile();
+}
+
+// ----- 나의 정보 창 -----
+const infoDialog = $("infoDialog");
+const profileForm = $("profileForm");
+const passwordForm = $("passwordForm");
+let formAvatar = null; // 창에서 고른 사진 (저장 전)
+
+function openInfo() {
+  closeMypageMenus();
+  formAvatar = profile.avatar;
+  $("editAvatar").innerHTML = avatarHtml(formAvatar);
+  profileForm.elements.nickname.value = profile.nickname;
+  $("infoEmail").textContent = currentEmail;
+  passwordForm.reset();
+  infoDialog.querySelectorAll(".message").forEach((m) => (m.hidden = true));
+  infoDialog.showModal();
+}
+
+// 마이페이지 → 나의 정보, 프로필의 톱니바퀴 (톱니바퀴는 다시 그려지므로 문서 전체에서 받음)
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-open-info]")) openInfo();
+});
+$("infoClose").addEventListener("click", () => infoDialog.close());
+
+$("avatarFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  e.target.value = ""; // 같은 사진을 다시 골라도 동작하게
+  if (!file) return;
+  const problem = checkAvatarFile(file);
+  if (problem) return showFormMessage(profileForm, problem);
+  try {
+    formAvatar = await resizeToSquare(file);
+    $("editAvatar").innerHTML = avatarHtml(formAvatar);
+    showFormMessage(profileForm, "사진을 골랐어요. 아래 \"프로필 저장\"을 눌러야 반영돼요.", false);
+  } catch (error) {
+    showFormMessage(profileForm, error.message);
+  }
+});
+
+$("avatarReset").addEventListener("click", () => {
+  formAvatar = null;
+  $("editAvatar").innerHTML = avatarHtml(null);
+  showFormMessage(profileForm, "기본 이미지로 바꿨어요. 아래 \"프로필 저장\"을 눌러야 반영돼요.", false);
+});
+
+onAuthSubmit(profileForm, async (f) => {
+  const nickname = f.nickname.value.trim().slice(0, 20);
+  const { error } = await db.from("profiles").upsert({ id: currentUserId, nickname: nickname || null, avatar: formAvatar });
+  if (error) throw error;
+  profile = { nickname, avatar: formAvatar };
+  renderProfile();
+  showFormMessage(profileForm, "프로필을 저장했어요.", false);
+});
+
+// 비밀번호 변경: 현재 비밀번호로 본인 확인 → 새 비밀번호 저장
+onAuthSubmit(passwordForm, async (f) => {
+  if (f.password.value !== f.password2.value) {
+    return showFormMessage(passwordForm, "새 비밀번호 확인이 일치하지 않아요.");
+  }
+  const { error: authError } = await db.auth.signInWithPassword({ email: currentEmail, password: f.current.value });
+  if (authError) {
+    const wrong = /Invalid login credentials/i.test(authError.message);
+    return showFormMessage(passwordForm, wrong ? "현재 비밀번호가 맞지 않아요." : friendlyError(authError));
+  }
+  const { error } = await db.auth.updateUser({ password: f.password.value });
+  if (error) throw error;
+  passwordForm.reset();
+  showFormMessage(passwordForm, "비밀번호를 바꿨어요. 다음 로그인부터 새 비밀번호를 사용해 주세요.", false);
+});
+
 // ----- 회원 탈퇴 -----
 // Supabase의 delete_my_account 함수가 "지금 로그인한 본인" 계정과 협찬 기록을 지움
 const withdrawDialog = $("withdrawDialog");
 const withdrawForm = $("withdrawForm");
 
 document.querySelectorAll("[data-withdraw]").forEach((b) => b.addEventListener("click", () => {
+  if (infoDialog.open) infoDialog.close(); // 나의 정보 창에서 눌렀으면 그 창은 닫고
   withdrawForm.reset();
   $("withdrawYes").disabled = true;
   withdrawForm.querySelector(".message").hidden = true;
@@ -387,8 +550,17 @@ function showView(session) {
     showAuthScreen(authScreenFromHash());
     authScreenReady = true;
   }
-  if (userId && userId !== currentUserId) loadItems(); // 사용자가 바뀌었을 때만 새로 불러오기
-  if (!userId) items = [];
+  currentEmail = session?.user?.email ?? "";
+  if (userId && userId !== currentUserId) {
+    // 사용자가 바뀌었을 때만 새로 불러오기
+    loadItems();
+    loadProfile(userId);
+  }
+  if (!userId) {
+    items = [];
+    profile = { nickname: "", avatar: null };
+    closeMypageMenus();
+  }
   currentUserId = userId;
 }
 

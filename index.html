@@ -109,7 +109,7 @@
       </form>
     </section>
 
-    <p class="credit">made by @sooe.home</p>
+    <p class="credit"><a href="https://www.instagram.com/sooe.home/" target="_blank" rel="noopener noreferrer">made by @sooe.home</a></p>
   </main>
 
   <!-- ===== 메인 화면 ===== -->
@@ -128,13 +128,22 @@
     </header>
 
     <div class="app-body">
-      <!-- PC: 왼쪽 일정 달력 (script에서 채움) -->
-      <aside class="side" aria-label="일정 달력">
+      <!-- PC 왼쪽: 프로필 → 일정 달력 → 마이페이지 → 만든 사람 -->
+      <aside class="side" aria-label="프로필과 일정 달력">
+        <div class="profile-card" id="profileSide"></div> <!-- script에서 채움 -->
         <div class="calendar cal-card" id="calendarSide"></div>
-        <div class="logout-side">
-          <button type="button" class="btn btn-ghost" data-logout>로그아웃</button>
-          <button type="button" class="btn btn-ghost withdraw-link" data-withdraw>회원 탈퇴</button>
+        <div class="mypage mypage-side">
+          <button type="button" class="mypage-btn" data-mypage-toggle aria-expanded="false">
+            <span class="avatar avatar-xs" data-avatar></span>
+            <span>마이페이지</span>
+            <span class="caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="mypage-menu" hidden>
+            <button type="button" data-open-info>나의 정보</button>
+            <button type="button" data-logout>로그아웃</button>
+          </div>
         </div>
+        <p class="credit"><a href="https://www.instagram.com/sooe.home/" target="_blank" rel="noopener noreferrer">made by @sooe.home</a></p>
       </aside>
 
       <div class="main-col">
@@ -153,15 +162,23 @@
         <main class="list" id="list"></main>
         <p class="empty" id="emptyMessage" hidden></p>
 
-        <!-- 휴대폰: 로그아웃은 목록 맨 아래 가운데 (PC는 왼쪽 달력 밑) -->
-        <div class="logout-bottom">
-          <button type="button" class="btn btn-ghost" data-logout>로그아웃</button>
-          <button type="button" class="btn btn-ghost withdraw-link" data-withdraw>회원 탈퇴</button>
+        <!-- 휴대폰: 목록 맨 아래 가운데에 마이페이지와 만든 사람 (PC는 왼쪽 달력 밑) -->
+        <div class="mobile-foot">
+          <div class="mypage mypage-bottom">
+          <button type="button" class="mypage-btn" data-mypage-toggle aria-expanded="false">
+            <span class="avatar avatar-xs" data-avatar></span>
+            <span>마이페이지</span>
+            <span class="caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="mypage-menu" hidden>
+            <button type="button" data-open-info>나의 정보</button>
+            <button type="button" data-logout>로그아웃</button>
+          </div>
+        </div>
+          <p class="credit"><a href="https://www.instagram.com/sooe.home/" target="_blank" rel="noopener noreferrer">made by @sooe.home</a></p>
         </div>
       </div>
     </div>
-
-    <p class="credit">made by @sooe.home</p>
   </div>
 
   <!-- ===== 휴대폰: 달력 버튼을 누르면 뜨는 달력 창 ===== -->
@@ -273,6 +290,63 @@
         <button type="submit" class="btn btn-primary" id="saveButton">저장</button>
       </footer>
     </form>
+  </dialog>
+
+  <!-- ===== 나의 정보 창 (마이페이지 → 나의 정보, 또는 프로필의 톱니바퀴) ===== -->
+  <dialog id="infoDialog" class="info-dialog">
+    <header class="dialog-head">
+      <h2>나의 정보</h2>
+      <button type="button" class="icon-btn" id="infoClose" aria-label="닫기">✕</button>
+    </header>
+
+    <div class="dialog-body">
+      <!-- 프로필: 사진 + 닉네임 -->
+      <form id="profileForm" class="info-section">
+        <h3>프로필</h3>
+        <div class="profile-edit">
+          <span class="avatar avatar-lg" id="editAvatar"></span>
+          <div class="profile-edit-actions">
+            <label class="btn btn-ghost btn-small file-btn">
+              사진 선택
+              <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+            </label>
+            <button type="button" class="btn btn-ghost btn-small" id="avatarReset">기본 이미지로</button>
+          </div>
+        </div>
+        <p class="hint avatar-hint">5MB 이하의 JPG·PNG·WEBP 사진만 올릴 수 있어요.<br>가운데를 기준으로 정사각형으로 맞춰 저장돼요.</p>
+        <label class="field">
+          <span>닉네임 (20자 이내)</span>
+          <input type="text" name="nickname" maxlength="20" autocomplete="nickname" placeholder="사진 아래에 보일 이름">
+        </label>
+        <p class="message" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block">프로필 저장</button>
+      </form>
+
+      <!-- 비밀번호 변경 -->
+      <form id="passwordForm" class="info-section">
+        <h3>비밀번호 변경</h3>
+        <p class="info-email">로그인 이메일 <b id="infoEmail"></b></p>
+        <label class="field">
+          <span>현재 비밀번호</span>
+          <input type="password" name="current" autocomplete="current-password" required>
+        </label>
+        <label class="field">
+          <span>새 비밀번호 (6자 이상)</span>
+          <input type="password" name="password" autocomplete="new-password" minlength="6" required>
+        </label>
+        <label class="field">
+          <span>새 비밀번호 확인</span>
+          <input type="password" name="password2" autocomplete="new-password" minlength="6" required>
+        </label>
+        <p class="message" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block">비밀번호 변경</button>
+      </form>
+
+      <!-- 회원 탈퇴 (작게, 맨 아래) -->
+      <div class="info-section info-withdraw">
+        <button type="button" class="btn btn-ghost withdraw-link" data-withdraw>회원 탈퇴</button>
+      </div>
+    </div>
   </dialog>
 
   <!-- 회원 탈퇴 확인 창 -->
