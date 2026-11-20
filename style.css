@@ -985,6 +985,16 @@ dialog::backdrop {
   color: var(--overdue);
 }
 
+/* 복구 불가 안내: 빨간 상자로 눈에 띄게 */
+.withdraw p.withdraw-warn {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--overdue);
+  background: var(--overdue-soft);
+  border-radius: 8px;
+}
+
 .withdraw .dialog-foot {
   padding: 4px 0 16px;
 }
