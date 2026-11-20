@@ -7,12 +7,10 @@ const db = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null
 const $ = (id) => document.getElementById(id);
 
 const authView = $("authView");
-const authForm = $("authForm");
-const authEmail = $("authEmail");
-const authPassword = $("authPassword");
-const authMessage = $("authMessage");
-const authSubmit = $("authSubmit");
-const authToggle = $("authToggle");
+const loginForm = $("loginForm");
+const signupForm = $("signupForm");
+const forgotForm = $("forgotForm");
+const resetForm = $("resetForm");
 
 const appView = $("appView");
 const list = $("list");
@@ -34,8 +32,9 @@ const toast = $("toast");
 let items = []; // 불러온 협찬 목록
 let filter = "active"; // 지금 보고 있는 필터
 let editingId = null; // 수정 중인 항목 id (새로 만들 땐 null)
-let isSignup = false; // 로그인/회원가입 중 어느 화면인지
 let currentUserId = null;
+// 메일의 "비밀번호 재설정" 링크로 들어왔는지 (주소 끝에 type=recovery 가 붙어 옴)
+let recoveryMode = /type=recovery/.test(window.location?.hash || "");
 
 // ===== 3. 작은 도우미 함수들 =====
 
@@ -122,7 +121,11 @@ function friendlyError(error) {
   if (/Invalid login credentials/i.test(msg)) return "이메일 또는 비밀번호가 맞지 않아요.";
   if (/already registered/i.test(msg)) return "이미 가입된 이메일이에요. 로그인해 주세요.";
   if (/Email not confirmed/i.test(msg)) return "이메일 인증이 아직 안 됐어요. 메일함을 확인해 주세요.";
-  if (/rate limit/i.test(msg)) return "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.";
+  if (/rate limit|security purposes/i.test(msg)) return "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.";
+  if (/should be different/i.test(msg)) return "지금 쓰는 비밀번호와 다른 비밀번호를 입력해 주세요.";
+  if (/at least 6/i.test(msg)) return "비밀번호는 6자 이상이어야 해요.";
+  if (/invalid.*email|email.*invalid/i.test(msg)) return "이메일 주소를 다시 확인해 주세요.";
+  if (/sending.*email|email.*send/i.test(msg)) return "메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요.";
   if (/sponsorships/i.test(msg) && /(does not exist|schema cache)/i.test(msg)) {
     return "데이터베이스 표가 아직 없어요. supabase.sql 을 먼저 실행해 주세요.";
   }
@@ -208,52 +211,136 @@ function cascade(field, value) {
   return changes;
 }
 
-// ===== 5. 로그인 =====
-function setAuthMode(signup) {
-  isSignup = signup;
-  authSubmit.textContent = signup ? "회원가입" : "로그인";
-  authToggle.textContent = signup ? "이미 계정이 있나요? 로그인" : "처음이신가요? 회원가입";
-  authPassword.autocomplete = signup ? "new-password" : "current-password";
-  authMessage.hidden = true;
+// ===== 5. 로그인 · 회원가입 · 비밀번호 찾기 =====
+// 메일 링크를 누르면 돌아올 주소 (지금 사이트 주소, # 뒤는 빼고)
+const siteUrl = () => window.location.origin + window.location.pathname;
+
+// 화면 전환: 주소 끝 #signup / #forgot 에 따라 (뒤로 가기 버튼도 동작)
+const AUTH_SCREENS = ["login", "signup", "forgot"];
+let authScreenReady = false; // 로그인 쪽 화면을 한 번이라도 골랐는지
+
+function authScreenFromHash(hash = window.location?.hash || "") {
+  const name = hash.slice(1);
+  return AUTH_SCREENS.includes(name) ? name : "login";
 }
 
-function showAuthMessage(text, isError = true) {
-  authMessage.textContent = text;
-  authMessage.classList.toggle("error", isError);
-  authMessage.hidden = false;
+function showAuthScreen(name) {
+  authView.querySelectorAll("[data-auth]").forEach((sec) => {
+    sec.hidden = sec.dataset.auth !== name;
+    sec.querySelector(".message").hidden = true; // 이전에 띄운 안내 문구는 지우기
+  });
 }
 
-authToggle.addEventListener("click", () => setAuthMode(!isSignup));
+window.addEventListener("hashchange", () => {
+  if (!currentUserId && !recoveryMode) showAuthScreen(authScreenFromHash());
+});
 
-authForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!db) return;
-  authSubmit.disabled = true;
-  const email = authEmail.value.trim();
-  const password = authPassword.value;
+function showFormMessage(form, text, isError = true) {
+  const msg = form.querySelector(".message");
+  msg.textContent = text;
+  msg.classList.toggle("error", isError);
+  msg.hidden = false;
+}
 
-  const { data, error } = isSignup
-    ? await db.auth.signUp({ email, password })
-    : await db.auth.signInWithPassword({ email, password });
+// 폼 제출 공통 처리: 버튼 잠그기 → 실행 → 오류면 문구 표시
+function onAuthSubmit(form, handler) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!db) return;
+    const button = form.querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+      await handler(form.elements);
+    } catch (error) {
+      showFormMessage(form, friendlyError(error));
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
 
-  authSubmit.disabled = false;
-  if (error) return showAuthMessage(friendlyError(error));
-  if (isSignup && !data.session) {
-    // Supabase에서 "이메일 인증"이 켜져 있으면 메일 확인 후 로그인해야 함
-    showAuthMessage("가입 확인 메일을 보냈어요. 메일의 링크를 누른 뒤 로그인해 주세요.", false);
-    setAuthMode(false);
-  }
+// 로그인
+onAuthSubmit(loginForm, async (f) => {
+  const { error } = await db.auth.signInWithPassword({ email: f.email.value.trim(), password: f.password.value });
+  if (error) throw error;
   // 성공하면 아래 onAuthStateChange가 화면을 바꿔줌
 });
 
-// 로그아웃 버튼: PC는 위쪽, 휴대폰은 목록 맨 아래 (둘 다 같은 동작)
+// 회원가입
+onAuthSubmit(signupForm, async (f) => {
+  if (f.password.value !== f.password2.value) {
+    return showFormMessage(signupForm, "비밀번호 확인이 일치하지 않아요.");
+  }
+  const { data, error } = await db.auth.signUp({
+    email: f.email.value.trim(),
+    password: f.password.value,
+    options: { emailRedirectTo: siteUrl() },
+  });
+  if (error) throw error;
+  if (!data.session) {
+    // Supabase에서 "가입 시 이메일 인증"이 켜져 있으면 메일 확인 후 로그인
+    showFormMessage(signupForm, "가입 확인 메일을 보냈어요. 메일의 링크를 누르면 가입이 끝나요.", false);
+  }
+});
+
+// 비밀번호 찾기: 재설정 링크 메일 보내기
+onAuthSubmit(forgotForm, async (f) => {
+  const { error } = await db.auth.resetPasswordForEmail(f.email.value.trim(), { redirectTo: siteUrl() });
+  if (error) throw error;
+  showFormMessage(forgotForm,
+    "재설정 링크를 보냈어요. 메일의 링크를 누르면 새 비밀번호를 정할 수 있어요. 메일이 안 보이면 스팸함도 확인해 주세요.", false);
+});
+
+// 새 비밀번호 저장 (재설정 링크로 들어온 상태)
+onAuthSubmit(resetForm, async (f) => {
+  if (f.password.value !== f.password2.value) {
+    return showFormMessage(resetForm, "비밀번호 확인이 일치하지 않아요.");
+  }
+  const { error } = await db.auth.updateUser({ password: f.password.value });
+  if (error) throw error;
+  recoveryMode = false;
+  resetForm.reset();
+  window.history?.replaceState(null, "", siteUrl()); // 주소창의 #... 정리
+  showToast("비밀번호를 바꿨어요.");
+  const { data } = await db.auth.getSession();
+  showView(data.session);
+});
+
+// 메일 링크가 만료됐거나 잘못된 경우 (주소 끝에 #error=...&error_description=... 이 붙어 옴)
+function handleLinkError() {
+  const hash = window.location?.hash || "";
+  if (!/error=/.test(hash)) return;
+  const params = new URLSearchParams(hash.slice(1));
+  window.history?.replaceState(null, "", siteUrl());
+  recoveryMode = false;
+  authScreenReady = true;
+  const expired = /expired|invalid/i.test(`${params.get("error_code")} ${params.get("error_description")}`);
+  showAuthScreen(expired ? "forgot" : "login");
+  showFormMessage(expired ? forgotForm : loginForm, expired
+    ? "링크가 만료됐거나 이미 사용됐어요. 다시 요청해 주세요."
+    : "링크를 확인하지 못했어요: " + (params.get("error_description") || ""));
+}
+
+// 로그아웃 버튼: PC는 달력 밑, 휴대폰은 목록 맨 아래 (둘 다 같은 동작)
 document.querySelectorAll("[data-logout]").forEach((b) => b.addEventListener("click", () => db.auth.signOut()));
 
 // 로그인 상태에 따라 화면 전환
 function showView(session) {
+  // 재설정 링크로 들어온 경우: 로그인은 됐지만 먼저 새 비밀번호 화면
+  if (recoveryMode && session) {
+    authView.hidden = false;
+    appView.hidden = true;
+    showAuthScreen("reset");
+    return;
+  }
   const userId = session?.user?.id ?? null;
   authView.hidden = !!userId;
   appView.hidden = !userId;
+  // 처음 열었을 때와 로그아웃했을 때만 화면 고르기 (띄워 둔 안내 문구가 지워지지 않게)
+  if (!userId && (currentUserId || !authScreenReady)) {
+    showAuthScreen(authScreenFromHash());
+    authScreenReady = true;
+  }
   if (userId && userId !== currentUserId) loadItems(); // 사용자가 바뀌었을 때만 새로 불러오기
   if (!userId) items = [];
   currentUserId = userId;
@@ -943,11 +1030,15 @@ $("confirmYes").addEventListener("click", async () => {
 if (!db) {
   // config.js에 연결 정보를 아직 안 넣은 경우
   authView.hidden = false;
-  showAuthMessage("config.js 에 Supabase 연결 정보를 먼저 넣어 주세요.");
-  authSubmit.disabled = true;
+  showFormMessage(loginForm, "config.js 에 Supabase 연결 정보를 먼저 넣어 주세요.");
+  loginForm.querySelector('[type="submit"]').disabled = true;
 } else {
+  handleLinkError();
   db.auth.getSession().then(({ data }) => showView(data.session));
-  db.auth.onAuthStateChange((_event, session) => showView(session));
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") recoveryMode = true;
+    showView(session);
+  });
 }
 
 // 자정이 지나면 D-day가 바뀌므로, 다시 화면에 돌아왔을 때 새로 그림

@@ -206,6 +206,20 @@ button {
   text-align: left;
 }
 
+.auth-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+.auth-links .link {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
 /* ===== 메인 화면 ===== */
 .app {
   max-width: 760px;

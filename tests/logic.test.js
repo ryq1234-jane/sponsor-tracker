@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, authScreenFromHash, friendlyError, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -153,6 +153,19 @@ eq("고른 날짜의 일정 2개 목록", (cal.match(/data-cal-edit=/g) || []).l
 eq("일정 제목도 안전하게", /<b>위험/.test(cal), false);
 eq("일정 없는 날", /일정이 없어요/.test(t.calendarHtml(calItems, 2026, 10, "2026-11-05")), true);
 eq("일정 3개까지만 점", (t.calendarHtml([...calItems, ...calItems], 2026, 10, "x").split('data-cal-date="2026-11-17"')[1].split("</button>")[0].match(/<i /g) || []).length, 3);
+
+// 로그인 쪽 화면 고르기 (주소 끝 #...)
+eq("주소에 # 없으면 로그인", t.authScreenFromHash(""), "login");
+eq("#signup → 회원가입", t.authScreenFromHash("#signup"), "signup");
+eq("#forgot → 비밀번호 찾기", t.authScreenFromHash("#forgot"), "forgot");
+eq("메일 링크 주소(#access_token...)는 로그인으로", t.authScreenFromHash("#access_token=x&type=recovery"), "login");
+eq("#reset 은 직접 못 들어감", t.authScreenFromHash("#reset"), "login");
+
+// 오류 문구
+eq("로그인 실패", t.friendlyError({ message: "Invalid login credentials" }), "이메일 또는 비밀번호가 맞지 않아요.");
+eq("같은 비밀번호로 변경", t.friendlyError({ message: "New password should be different from the old password." }), "지금 쓰는 비밀번호와 다른 비밀번호를 입력해 주세요.");
+eq("메일 너무 자주 요청", t.friendlyError({ message: "For security purposes, you can only request this after 42 seconds." }), "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.");
+eq("메일 발송 실패", t.friendlyError({ message: "Error sending recovery email" }), "메일을 보내지 못했어요. 잠시 후 다시 시도해 주세요.");
 
 console.log(fail ? `\n${fail}개 실패` : "\n모두 통과");
 process.exit(fail ? 1 : 0);
