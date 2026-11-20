@@ -692,7 +692,7 @@ function cardHtml(it) {
   const applyOpen = expandedLists.has(`apply-${it.id}`);
   const applied = getApplyTypes(it);
   const applyList = `
-    <ul class="post-list apply-list" id="apply-${it.id}" ${applyOpen ? "" : "hidden"}>
+    <ul class="post-list apply-list ${it.applied ? "on" : ""}" id="apply-${it.id}" ${applyOpen ? "" : "hidden"}>
       ${APPLY_TYPES.map((type) => `
         <li class="${applied.includes(type) ? "done" : ""}">
           <span class="post-mark" aria-label="${applied.includes(type) ? "신청함" : "신청 안 함"}"></span>
@@ -704,7 +704,7 @@ function cardHtml(it) {
   // "리뷰" 버튼을 누르면 아래로 펼쳐지는 게시물 목록 (표시만)
   const postsOpen = expandedLists.has(`posts-${it.id}`);
   const postList = `
-    <ul class="post-list" id="posts-${it.id}" ${postsOpen ? "" : "hidden"}>
+    <ul class="post-list ${it.reviewed ? "on" : ""}" id="posts-${it.id}" ${postsOpen ? "" : "hidden"}>
       ${posts.map((p, i) => {
         const url = safeUrl(p.url);
         return `
