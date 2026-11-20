@@ -769,10 +769,10 @@ function cardHtml(it) {
         ${step("received", "수령")}
         <button type="button" class="chip review-chip ${it.reviewed ? "on" : ""}"
           data-list-toggle="posts-${it.id}" aria-expanded="${postsOpen}" aria-controls="posts-${it.id}">리뷰 ${postsDone}/${posts.length}</button>
+        <!-- 펼친 목록은 같은 칸 바로 아래에 같은 너비로 (협찬: 1번째 칸, 리뷰: 4번째 칸) -->
+        ${applyList}
+        ${postList}
       </div>
-
-      ${applyList}
-      ${postList}
 
       ${memoBox}
 

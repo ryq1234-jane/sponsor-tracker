@@ -477,7 +477,7 @@ button {
 /* 카드 안의 진행 표시 (누를 수 없음, 체크는 수정 창에서) */
 .checks-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 펼친 목록 내용과 상관없이 네 칸 너비 똑같이 */
   gap: 6px;
 }
 
@@ -529,22 +529,25 @@ button {
 /* 리뷰 아래로 펼쳐지는 게시물 목록 */
 .post-list {
   position: relative;
+  grid-row: 2;          /* 버튼 줄 바로 아래 줄 */
+  grid-column: 4;       /* 리뷰 = 4번째 칸과 같은 너비 */
   display: grid;
+  align-content: start;
   gap: 6px;
-  margin: 8px 0 0;
-  padding: 10px 12px;
+  margin: 2px 0 0;
+  padding: 10px;
   list-style: none;
   background: var(--yellow);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
 
-/* 위쪽 작은 화살표가 "리뷰" 버튼(4번째 칸)을 가리키게 */
+/* 위쪽 작은 화살표가 바로 위 버튼 가운데를 가리키게 */
 .post-list::before {
   content: "";
   position: absolute;
   top: -7px;
-  right: calc(12.5% - 7px);
+  left: calc(50% - 7px);
   width: 12px;
   height: 12px;
   background: var(--yellow);
@@ -553,11 +556,19 @@ button {
   transform: rotate(45deg);
 }
 
+/* 좁은 칸: [체크][이름] 한 줄, 금액·"보기 ↗"는 이름 아래 줄로 */
 .post-list li {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 2px 6px;
+  font-size: 0.85rem;
+}
+
+.post-list li > :nth-child(n + 3) {
+  flex-basis: 100%;
+  padding-left: 24px;
+  white-space: nowrap; /* "300,000원", "보기 ↗"는 중간에 끊지 않음 */
 }
 
 .post-mark {
@@ -576,9 +587,8 @@ button {
 .post-name {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: keep-all;     /* 좁은 칸에서는 잘리지 않고 다음 줄로 */
+  overflow-wrap: anywhere;
 }
 
 .post-list li.done .post-name {
@@ -587,9 +597,30 @@ button {
 }
 
 /* 신청 종류 목록: 화살표는 "신청" 버튼(1번째 칸)을 가리키고, 체크한 종류는 줄 긋지 않고 진하게 */
-.apply-list::before {
-  right: auto;
-  left: calc(12.5% - 7px);
+.post-list.apply-list {
+  grid-column: 1; /* 협찬 = 1번째 칸과 같은 너비 */
+}
+
+/* 휴대폰: 칸이 좁으니 여백을 줄이고, 금액·"보기 ↗"는 들여쓰기 없이 */
+@media (max-width: 560px) {
+  .post-list {
+    gap: 5px;
+    padding: 8px 6px;
+  }
+
+  .post-list li {
+    gap: 2px 4px;
+    font-size: 0.8rem;
+  }
+
+  /* 칸이 좁아 체크 네모는 숨김 — 체크한 협찬 종류는 진하게, 끝낸 게시물은 줄 긋기로 구분 */
+  .post-list .post-mark {
+    display: none;
+  }
+
+  .post-list li > :nth-child(n + 3) {
+    padding-left: 0;
+  }
 }
 
 .post-list.apply-list li .post-name {
