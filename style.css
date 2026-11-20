@@ -509,6 +509,11 @@ button {
   content: "✓ ";
 }
 
+/* 리뷰 버튼은 왼쪽 ○/✓ 없이 오른쪽에 개수 또는 ✓ */
+.chip.posts-chip::before {
+  content: none;
+}
+
 /* "리뷰" 버튼만 누를 수 있음 → 아래로 게시물 목록 펼치기 */
 .review-chip {
   width: 100%;

@@ -80,6 +80,8 @@ eq("게시물 목록은 처음엔 접혀 있음", /id="posts-p"\s+hidden/.test(p
 t.expandedLists.add("posts-p");
 eq("펼친 게시물 목록은 다시 그려도 펼친 상태", /id="posts-p"\s+>/.test(t.cardHtml(three)) && /aria-expanded="true"/.test(t.cardHtml(three)), true);
 eq("게시물 1개여도 리뷰 1/1 메뉴", /리뷰 0\/1/.test(t.cardHtml({ ...three, id: "q", posts: [three.posts[1]] })), true);
+eq("리뷰 다 끝나면 '리뷰 ✓'", />리뷰 ✓<\/button>/.test(t.cardHtml({ ...three, id: "r1", reviewed: true, posts: three.posts.map((p) => ({ ...p, done: true })) })), true);
+eq("리뷰 덜 끝났으면 개수만", />리뷰 1\/3<\/button>/.test(pc), true);
 eq("완료한 게시물은 완료 표시", /<li class="done">/.test(pc), true);
 
 // 신청 종류 (신청의 하위 메뉴)

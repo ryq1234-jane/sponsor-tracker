@@ -766,8 +766,9 @@ function cardHtml(it) {
           data-list-toggle="apply-${it.id}" aria-expanded="${applyOpen}" aria-controls="apply-${it.id}">협찬</button>
         ${step("selected", "선정")}
         ${step("received", "수령")}
-        <button type="button" class="chip review-chip ${it.reviewed ? "on" : ""}"
-          data-list-toggle="posts-${it.id}" aria-expanded="${postsOpen}" aria-controls="posts-${it.id}">리뷰 ${postsDone}/${posts.length}</button>
+        <!-- 리뷰: 왼쪽 동그라미 없이, 다 끝나면 "리뷰 ✓", 아니면 "리뷰 1/3" -->
+        <button type="button" class="chip review-chip posts-chip ${it.reviewed ? "on" : ""}"
+          data-list-toggle="posts-${it.id}" aria-expanded="${postsOpen}" aria-controls="posts-${it.id}">리뷰 ${it.reviewed || postsDone === posts.length ? "✓" : `${postsDone}/${posts.length}`}</button>
         <!-- 펼친 목록은 같은 칸 바로 아래에 같은 너비로 (협찬: 1번째 칸, 리뷰: 4번째 칸) -->
         ${applyList}
         ${postList}
