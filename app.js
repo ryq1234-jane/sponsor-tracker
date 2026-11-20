@@ -16,7 +16,7 @@ const appView = $("appView");
 const list = $("list");
 const emptyMessage = $("emptyMessage");
 const summary = $("summary");
-const filterButtons = document.querySelectorAll("#filters button");
+const filterButtons = document.querySelectorAll("#filters [data-filter]"); // 필터 줄의 "+ 새 협찬"은 제외
 
 const editDialog = $("editDialog");
 const editForm = $("editForm");
@@ -347,9 +347,9 @@ document.addEventListener("click", (e) => {
 });
 
 // ----- 프로필 (사진 + 닉네임) -----
-// 사진은 240×240 정사각형 JPG로 줄여서 profiles 표에 글자(data URL)로 저장 (보통 20~40KB)
+// 사진은 400×400 정사각형 JPG로 줄여서 profiles 표에 글자(data URL)로 저장 (보통 20~40KB)
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 원본 사진은 5MB까지
-const AVATAR_SIZE = 240;
+const AVATAR_SIZE = 400; // PC에서 크게, 휴대폰에서 가로로 잘라 보여도 선명하게
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 const PERSON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M2.5 24c0-5.6 4.3-9.5 9.5-9.5s9.5 3.9 9.5 9.5z"/></svg>`;
@@ -385,7 +385,7 @@ function resizeToSquare(file) {
       ctx.fillRect(0, 0, AVATAR_SIZE, AVATAR_SIZE);
       ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL("image/jpeg", 0.85));
+      resolve(canvas.toDataURL("image/jpeg", 0.82));
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
@@ -404,8 +404,20 @@ function profileCardHtml(p) {
     <p class="profile-name ${p.nickname ? "" : "is-empty"}">${esc(p.nickname || "닉네임을 설정해 주세요")}</p>`;
 }
 
+// 휴대폰 상단: 가로로 긴 직사각형 사진 + 닉네임 (사진은 가운데 위쪽 기준으로 잘림)
+function profileBannerHtml(p) {
+  const hasPhoto = avatarHtml(p.avatar).startsWith("<img"); // 올바른 사진일 때만
+  return `
+    <div class="banner ${hasPhoto ? "" : "no-photo"}">
+      ${hasPhoto ? avatarHtml(p.avatar) : `<span class="avatar avatar-banner">${PERSON_SVG}</span>`}
+      <p class="banner-name ${p.nickname ? "" : "is-empty"}">${esc(p.nickname || "닉네임을 설정해 주세요")}</p>
+      <button type="button" class="profile-gear" data-open-info aria-label="프로필 설정">${GEAR_SVG}</button>
+    </div>`;
+}
+
 function renderProfile() {
   $("profileSide").innerHTML = profileCardHtml(profile);
+  $("profileBanner").innerHTML = profileBannerHtml(profile);
   document.querySelectorAll("[data-avatar]").forEach((el) => (el.innerHTML = avatarHtml(profile.avatar)));
 }
 
@@ -1179,7 +1191,8 @@ editForm.elements.review_due.addEventListener("input", () => {
   dueEditedByHand = editForm.elements.review_due.value !== "";
 });
 
-$("addButton").addEventListener("click", () => openEditor());
+// "+ 새 협찬": PC는 오른쪽 위, 휴대폰은 필터 줄 오른쪽
+document.querySelectorAll("[data-add]").forEach((b) => b.addEventListener("click", () => openEditor()));
 $("editClose").addEventListener("click", closeEditor);
 $("editCancel").addEventListener("click", closeEditor);
 

@@ -1277,13 +1277,28 @@ dialog::backdrop {
 }
 
 /* PC 왼쪽 위 프로필 카드 */
+/* 흰 상자 없이 사진만: 달력 너비의 약 2/3 */
 .profile-card {
-  margin-bottom: 12px;
-  padding: 20px 14px 16px;
+  margin-bottom: 16px;
+  padding: 4px 0 0;
   text-align: center;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
+}
+
+.profile-card .profile-photo {
+  display: block;
+  width: 66.7%;
+  margin: 0 auto;
+}
+
+.profile-card .avatar-lg {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: 22px;
+}
+
+.profile-card .profile-name {
+  font-size: 1.15rem;
 }
 
 .profile-photo {
@@ -1411,6 +1426,143 @@ dialog::backdrop {
 
 .mobile-foot {
   margin-top: 28px;
+}
+
+/* 휴대폰 오른쪽 위 마이페이지: 메뉴는 버튼 아래로 겹쳐서 펼침 */
+.mypage-top {
+  position: relative;
+}
+
+.mypage-top .mypage-btn {
+  padding: 5px 10px 5px 5px;
+  font-size: 0.85rem;
+}
+
+.mypage-top .mypage-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  margin-top: 0;
+  min-width: 160px;
+}
+
+/* 휴대폰 필터 줄 오른쪽 "+ 새 협찬" */
+.filters .filter-add {
+  margin-left: auto;
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* 휴대폰 상단 프로필: 제목처럼 가로로 긴 사진 */
+.profile-banner {
+  margin: 4px 0 14px;
+}
+
+.banner {
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+  background: #e9ecf1;
+  border-radius: 16px;
+}
+
+.banner > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%; /* 얼굴이 보통 위쪽이라 살짝 위 기준 */
+}
+
+/* 사진 아래쪽을 살짝 어둡게 해서 닉네임이 잘 보이게 */
+.banner:not(.no-photo)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 60%;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+  pointer-events: none;
+}
+
+.banner-name {
+  position: absolute;
+  left: 16px;
+  bottom: 12px;
+  z-index: 1;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.banner-name.is-empty {
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.banner .profile-gear {
+  top: 10px;
+  right: 10px;
+  bottom: auto;
+  z-index: 2;
+  opacity: 1;
+}
+
+/* 사진이 없을 때: 흰 줄에 빈 사람 모양 + 닉네임 */
+.banner.no-photo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: auto;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.avatar-banner {
+  width: 64px;
+  height: 64px;
+}
+
+.no-photo .banner-name {
+  position: static;
+  font-size: 1.1rem;
+  color: var(--text);
+  text-shadow: none;
+}
+
+.no-photo .banner-name.is-empty {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.no-photo .profile-gear {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* 화면 폭에 따라 보이는 것: 1024px 이상 PC / 미만 휴대폰·태블릿 */
+@media (min-width: 1024px) {
+  .only-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .only-pc {
+    display: none !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .filters button {
+    padding: 8px 11px;
+  }
 }
 
 .credit a {
