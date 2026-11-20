@@ -433,27 +433,20 @@ function encodeAvatar(canvas) {
   return null;
 }
 
-function profileCardHtml(p) {
-  return `
-    <div class="profile-photo">
-      <span class="avatar avatar-lg">${avatarHtml(p.avatar)}</span>
-      <button type="button" class="profile-gear" data-open-info aria-label="프로필 설정">${GEAR_SVG}</button>
-    </div>
-    <p class="profile-name ${p.nickname ? "" : "is-empty"}">${esc(p.nickname || "닉네임을 설정해 주세요")}</p>`;
-}
-
-// 휴대폰 상단: 가로로 긴 직사각형 사진 + 닉네임 (사진은 가운데 위쪽 기준으로 잘림)
-function profileBannerHtml(p) {
+// 프로필: 가로로 긴 직사각형 사진(9:4) + 사진 안 왼쪽 아래 닉네임 (사진은 가운데 위쪽 기준으로 잘림)
+// PC(withGear)는 마우스를 올리면 톱니바퀴, 휴대폰은 톱니바퀴 없음 (마이페이지 → 나의 정보에서 바꿈)
+function profileBannerHtml(p, withGear = false) {
   const hasPhoto = avatarHtml(p.avatar).startsWith("<img"); // 올바른 사진일 때만
   return `
     <div class="banner ${hasPhoto ? "" : "no-photo"}">
       ${hasPhoto ? avatarHtml(p.avatar) : `<span class="avatar avatar-banner">${PERSON_SVG}</span>`}
       <p class="banner-name ${p.nickname ? "" : "is-empty"}">${esc(p.nickname || "닉네임을 설정해 주세요")}</p>
-    </div>`; // 휴대폰은 톱니바퀴 없음 (마이페이지 → 나의 정보에서 바꿈)
+      ${withGear ? `<button type="button" class="profile-gear" data-open-info aria-label="프로필 설정">${GEAR_SVG}</button>` : ""}
+    </div>`;
 }
 
 function renderProfile() {
-  $("profileSide").innerHTML = profileCardHtml(profile);
+  $("profileSide").innerHTML = profileBannerHtml(profile, true);
   $("profileBanner").innerHTML = profileBannerHtml(profile);
 }
 

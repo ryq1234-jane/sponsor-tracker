@@ -1283,40 +1283,18 @@ dialog::backdrop {
 }
 
 /* PC 왼쪽 위 프로필 카드 */
-/* 흰 상자 없이 사진만: 달력 너비의 약 2/3 */
+/* PC 왼쪽 위 프로필: 휴대폰과 같은 가로 사진 (아래 .banner 스타일 공유) */
 .profile-card {
-  margin-bottom: 16px;
-  padding: 4px 0 0;
-  text-align: center;
-}
-
-.profile-card .profile-photo {
-  display: block;
-  width: 66.7%;
-  margin: 0 auto;
-}
-
-.profile-card .avatar-lg {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1;
-  border-radius: 22px;
-}
-
-.profile-card .profile-name {
-  font-size: 1.15rem;
-}
-
-.profile-photo {
   position: relative;
-  display: inline-block;
+  margin-bottom: 14px;
 }
 
 /* 톱니바퀴: 마우스를 올리면 나타남 (터치 화면은 항상 보임) */
 .profile-gear {
   position: absolute;
-  right: -10px;
-  bottom: -10px;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1351,19 +1329,6 @@ dialog::backdrop {
   .profile-gear {
     opacity: 1;
   }
-}
-
-.profile-name {
-  margin: 12px 0 0;
-  font-size: 1rem;
-  font-weight: 700;
-  word-break: break-all;
-}
-
-.profile-name.is-empty {
-  font-size: 0.85rem;
-  font-weight: 400;
-  color: var(--muted);
 }
 
 /* ===== 마이페이지 버튼 + 펼쳐지는 메뉴 ===== */
@@ -1469,7 +1434,9 @@ dialog::backdrop {
 
 .banner {
   position: relative;
-  height: 160px;
+  aspect-ratio: 9 / 4; /* 휴대폰·PC 같은 비율 */
+  max-height: 220px; /* 태블릿처럼 넓은 화면에서 너무 커지지 않게 */
+  width: 100%;
   overflow: hidden;
   background: #e9ecf1;
   border-radius: 16px;
@@ -1517,7 +1484,7 @@ dialog::backdrop {
   display: flex;
   align-items: center;
   gap: 14px;
-  height: auto;
+  aspect-ratio: auto;
   padding: 14px 16px;
   background: var(--card);
   border: 1px solid var(--line);
@@ -1533,6 +1500,11 @@ dialog::backdrop {
   font-size: 1.1rem;
   color: var(--text);
   text-shadow: none;
+}
+
+.no-photo .profile-gear {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .no-photo .banner-name.is-empty {
