@@ -487,9 +487,9 @@ button {
   display: block;
   padding: 9px 0;
   font-size: 0.85rem;
-  font-weight: 700; /* 협찬·선정·수령·리뷰 글씨는 굵게 (옅은 바탕에서도 잘 보이게) */
+  font-weight: 400; /* 협찬·선정·수령·리뷰 글씨: 굵지 않게, 검정 (✓·○ 표시도 같은 색) */
   text-align: center;
-  color: var(--soft-text);
+  color: var(--text);
   background: var(--chip-off);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -500,7 +500,7 @@ button {
 }
 
 .chip.on {
-  color: var(--soft-text); /* 글씨색은 체크 안 된 버튼(리뷰)과 같게 */
+  color: var(--text);
   background: var(--chip-on);
   border-color: var(--line-strong);
 }
@@ -576,7 +576,7 @@ button {
   align-items: center;
   gap: 2px 6px;
   font-size: 0.85rem;
-  color: var(--soft-text);
+  color: var(--text);
 }
 
 .post-list li > :nth-child(n + 3) {
@@ -607,7 +607,7 @@ button {
 }
 
 .post-list li.done .post-name {
-  color: var(--soft-text);
+  color: var(--text);
   text-decoration: line-through;
 }
 
@@ -643,11 +643,11 @@ button {
 }
 
 .post-list.apply-list li .post-name {
-  color: var(--soft-text);
+  color: var(--text);
 }
 
 .post-list.apply-list li.done .post-name {
-  color: var(--soft-text);
+  color: var(--text);
   font-weight: 400; /* 체크 여부는 체크박스로 구분 (휴대폰은 아래에서 흐림으로) */
   text-decoration: none;
 }
@@ -656,7 +656,7 @@ button {
   flex-shrink: 0;
   font-size: 0.8rem;
   font-weight: 400;
-  color: var(--soft-text);
+  color: var(--text);
   text-decoration: none;
 }
 
@@ -1029,7 +1029,7 @@ dialog::backdrop {
 .apply-amount {
   font-size: 0.85rem;
   font-weight: 400;
-  color: var(--soft-text);
+  color: var(--text);
 }
 
 .review-block .posts-edit {
