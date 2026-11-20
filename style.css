@@ -1,20 +1,32 @@
 /* ===== 색과 기본 설정 ===== */
 :root {
-  --bg: #f4f5f7;
-  --card: #ffffff;
-  --text: #1f2328;
-  --muted: #6b7280;
-  --line: #e5e7eb;
-  --primary: #3b6ef5;
-  --primary-soft: #e8eefe;
-  --soon: #e8590c;
-  --soon-soft: #fff1e6;
-  --overdue: #d92d20;
-  --overdue-soft: #fdecea;
-  --done: #2f9e44;
-  --done-soft: #e9f7ec;
-  --visit: #7048e8;
-  --visit-soft: #f0ebfe;
+  /* 받은 팔레트 */
+  --pink: #FFCFDF;
+  --yellow: #FEFDCA;
+  --green: #E0F9B5;
+  --sky: #A5DEE5;
+  --white: #FFFFFF;
+  --text: #373A40;   /* 진한 글씨 */
+  --muted: #686D76;  /* 연한 글씨 */
+
+  /* 역할별로 배치 */
+  --bg: var(--yellow);            /* 페이지 바탕 */
+  --card: var(--white);           /* 카드·입력칸 */
+  --line: rgba(104, 109, 118, 0.2);        /* 테두리 (연한 글씨색을 옅게) */
+  --line-strong: rgba(104, 109, 118, 0.35);
+  --subtle: rgba(104, 109, 118, 0.07);     /* 옅은 회색 바탕 */
+  --hover: rgba(104, 109, 118, 0.1);
+  --faint: rgba(104, 109, 118, 0.4);
+  --primary: var(--sky);          /* 주요 버튼·선택 */
+  --primary-soft: rgba(165, 222, 229, 0.4);
+  --soon: var(--pink);            /* 마감 임박 */
+  --soon-soft: rgba(255, 207, 223, 0.55);
+  --overdue: var(--pink);         /* 마감 지남·삭제·오류 */
+  --overdue-soft: var(--pink);
+  --done: var(--green);           /* 완료·체크 */
+  --done-soft: var(--green);
+  --visit: var(--sky);            /* 배송 대기 */
+  --visit-soft: rgba(165, 222, 229, 0.4);
 }
 
 * {
@@ -63,12 +75,12 @@ button {
 }
 
 .btn-primary {
-  color: #fff;
+  color: var(--text);
   background: var(--primary);
 }
 
 .btn-primary:hover {
-  background: #2c58d1;
+  background: var(--primary);
 }
 
 .btn-ghost {
@@ -77,11 +89,11 @@ button {
 }
 
 .btn-ghost:hover {
-  background: #eceef1;
+  background: var(--hover);
 }
 
 .btn-danger {
-  color: var(--overdue);
+  color: var(--text);
   background: var(--overdue-soft);
 }
 
@@ -98,7 +110,7 @@ button {
 .link {
   margin-top: 16px;
   padding: 4px;
-  color: var(--primary);
+  color: var(--text);
   background: none;
   border: none;
   cursor: pointer;
@@ -116,7 +128,7 @@ button {
 }
 
 .icon-btn:hover {
-  background: #eceef1;
+  background: var(--hover);
 }
 
 /* ===== 입력칸 ===== */
@@ -127,7 +139,7 @@ button {
   margin: 0 0 14px;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #374151;
+  color: var(--text);
 }
 
 .field input,
@@ -138,7 +150,7 @@ button {
   font-weight: 400;
   color: var(--text);
   background: #fff;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
 }
 
@@ -164,13 +176,13 @@ button {
   margin: 0 0 12px;
   padding: 10px 12px;
   font-size: 0.85rem;
-  color: var(--done);
+  color: var(--text);
   background: var(--done-soft);
   border-radius: 8px;
 }
 
 .message.error {
-  color: var(--overdue);
+  color: var(--text);
   background: var(--overdue-soft);
 }
 
@@ -205,7 +217,7 @@ button {
 
 /* 제목 글씨: 기본 글씨체, 색만 "+ 새 협찬" 버튼과 같은 파란색 */
 .brand {
-  color: var(--primary);
+  color: var(--text);
 }
 
 .auth-card .muted {
@@ -224,7 +236,7 @@ button {
   font-size: 0.8rem;
   line-height: 1.55;
   color: var(--muted);
-  background: #f6f7f9;
+  background: var(--subtle);
   border-radius: 8px;
   word-break: keep-all;
 }
@@ -249,7 +261,7 @@ button {
   font-size: 0.75rem;
   letter-spacing: 0.02em;
   text-align: center;
-  color: #b0b5bd;
+  color: var(--muted);
 }
 
 /* 로그인 화면: 카드 아래에 표기가 오도록 세로로 쌓기 */
@@ -280,7 +292,7 @@ button {
   margin: 0 -16px;
   padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
-  background: rgba(244, 245, 247, 0.92);
+  background: rgba(254, 253, 202, 0.92);
   backdrop-filter: blur(8px);
 }
 
@@ -323,9 +335,9 @@ button {
   white-space: nowrap;
 }
 
-.stat.has-waiting b { color: var(--visit); }
-.stat.has-soon b { color: var(--soon); }
-.stat.has-overdue b { color: var(--overdue); }
+.stat.has-waiting b { color: var(--text); }
+.stat.has-soon b { color: var(--text); }
+.stat.has-overdue b { color: var(--text); }
 
 /* 필터 */
 .filters {
@@ -368,7 +380,7 @@ button {
 }
 
 .card.is-soon { border-left-color: var(--soon); }
-.card.is-overdue { border-left-color: var(--overdue); background: #fffafa; }
+.card.is-overdue { border-left-color: var(--overdue); background: linear-gradient(rgba(255, 207, 223, 0.2), rgba(255, 207, 223, 0.2)), var(--card); }
 .card.stage-done,
 .card.stage-rejected { opacity: 0.65; }
 
@@ -397,16 +409,16 @@ button {
   white-space: nowrap;
 }
 
-.stage { color: var(--primary); background: var(--primary-soft); }
-.stage-selected .stage { color: var(--visit); background: var(--visit-soft); }
-.stage-received .stage { color: var(--soon); background: var(--soon-soft); }
-.stage-done .stage { color: var(--done); background: var(--done-soft); }
+.stage { color: var(--text); background: var(--yellow); box-shadow: inset 0 0 0 1px var(--line); }
+.stage-selected .stage { color: var(--text); background: var(--visit-soft); }
+.stage-received .stage { color: var(--text); background: var(--soon-soft); }
+.stage-done .stage { color: var(--text); background: var(--done-soft); }
 .stage-rejected .stage,
-.stage-planned .stage { color: var(--muted); background: #f1f2f4; }
+.stage-planned .stage { color: var(--muted); background: var(--subtle); }
 
 .platform {
   color: var(--muted);
-  background: #f1f2f4;
+  background: var(--subtle);
 }
 
 /* 경로 태그: 직접 신청(회색 테두리) / 제안 받음(파란 테두리) */
@@ -417,17 +429,17 @@ button {
 }
 
 .origin-offered {
-  color: var(--primary);
+  color: var(--text);
   border-color: var(--primary);
 }
 
 .dday {
   color: var(--text);
-  background: #f1f2f4;
+  background: var(--subtle);
 }
 
-.dday.soon { color: #fff; background: var(--soon); }
-.dday.overdue { color: #fff; background: var(--overdue); }
+.dday.soon { color: var(--text); background: var(--soon-soft); }
+.dday.overdue { color: var(--text); background: var(--overdue); }
 
 .card-title {
   margin: 0 0 4px;
@@ -437,7 +449,7 @@ button {
 .offer {
   margin: 0 0 10px;
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--text);
 }
 
 .meta {
@@ -476,7 +488,7 @@ button {
   font-weight: 700;
   text-align: center;
   color: var(--muted);
-  background: #f6f7f9;
+  background: var(--subtle);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -486,9 +498,9 @@ button {
 }
 
 .chip.on {
-  color: var(--done);
+  color: var(--text);
   background: var(--done-soft);
-  border-color: #b7e4c0;
+  border-color: var(--line-strong);
 }
 
 .chip.on::before {
@@ -522,7 +534,7 @@ button {
   margin: 8px 0 0;
   padding: 10px 12px;
   list-style: none;
-  background: #f9fafb;
+  background: var(--yellow);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -535,7 +547,7 @@ button {
   right: calc(12.5% - 7px);
   width: 12px;
   height: 12px;
-  background: #f9fafb;
+  background: var(--yellow);
   border-top: 1px solid var(--line);
   border-left: 1px solid var(--line);
   transform: rotate(45deg);
@@ -552,13 +564,13 @@ button {
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  border: 2px solid #c4c8cf;
+  border: 2px solid var(--faint);
   border-radius: 5px;
 }
 
 .post-list li.done .post-mark {
-  background: var(--done) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3 3 7-7' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
-  border-color: var(--done);
+  background: var(--done) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3 3 7-7' fill='none' stroke='%23373A40' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
+  border-color: var(--line-strong);
 }
 
 .post-name {
@@ -594,14 +606,14 @@ button {
   flex-shrink: 0;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--text);
   text-decoration: none;
 }
 
 /* 메모 여러 개: 좌우로 밀어서 넘기기 */
 .memos {
   margin: 12px 0 0;
-  background: #f9fafb;
+  background: var(--yellow);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -647,7 +659,7 @@ button {
 }
 
 .memo-nav button:hover {
-  background: #eceef1;
+  background: var(--hover);
 }
 
 .memo-dots {
@@ -658,7 +670,7 @@ button {
 .memo-dots i {
   width: 6px;
   height: 6px;
-  background: #d1d5db;
+  background: var(--line-strong);
   border-radius: 50%;
   transition: background 0.15s, width 0.15s;
 }
@@ -698,7 +710,7 @@ button {
   overflow: hidden;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: #4b5563;
+  color: var(--text);
   white-space: pre-line; /* 메모의 줄바꿈 그대로 표시 */
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -711,7 +723,7 @@ button {
 
 /* 메모 속 링크 (긴 주소는 줄바꿈해서 카드 밖으로 안 나가게) */
 .memo a {
-  color: var(--primary);
+  color: var(--text);
   text-decoration: underline;
   text-underline-offset: 2px;
   word-break: break-all;
@@ -722,7 +734,7 @@ button {
   padding: 2px 0;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--text);
   background: none;
   border: none;
   cursor: pointer;
@@ -738,7 +750,7 @@ button {
 .stepper {
   display: flex;
   align-items: center;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -748,13 +760,13 @@ button {
   height: 32px;
   font-size: 1.1rem;
   color: var(--text);
-  background: #f6f7f9;
+  background: var(--subtle);
   border: none;
   cursor: pointer;
 }
 
 .stepper button:disabled {
-  color: #c4c8cf;
+  color: var(--faint);
   cursor: default;
 }
 
@@ -809,7 +821,7 @@ button {
 .links a {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--text);
   text-decoration: none;
 }
 
@@ -966,7 +978,7 @@ dialog::backdrop {
 .apply-amount {
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--text);
 }
 
 .review-block .posts-edit {
@@ -993,7 +1005,7 @@ dialog::backdrop {
 .withdraw-link {
   font-size: 0.8rem;
   font-weight: 400;
-  color: #9ca3af;
+  color: var(--muted);
 }
 
 /* 회원 탈퇴 확인 창 */
@@ -1012,7 +1024,7 @@ dialog::backdrop {
 }
 
 .withdraw p b {
-  color: var(--overdue);
+  color: var(--text);
 }
 
 .withdraw p.message {
@@ -1025,7 +1037,7 @@ dialog::backdrop {
   margin-bottom: 14px;
   padding: 10px 12px;
   font-size: 0.9rem;
-  color: var(--overdue);
+  color: var(--text);
   background: var(--overdue-soft);
   border-radius: 8px;
 }
@@ -1045,7 +1057,7 @@ dialog::backdrop {
   padding: 10px 16px;
   font-size: 0.9rem;
   color: #fff;
-  background: rgba(31, 35, 40, 0.92);
+  background: rgba(55, 58, 64, 0.94);
   border-radius: 10px;
 }
 
@@ -1092,8 +1104,8 @@ dialog::backdrop {
   color: var(--muted);
 }
 
-.cal-wd:first-child { color: var(--overdue); }
-.cal-wd:nth-child(7) { color: var(--primary); }
+.cal-wd:first-child { color: var(--muted); }
+.cal-wd:nth-child(7) { color: var(--muted); }
 
 .cal-day {
   display: flex;
@@ -1112,26 +1124,26 @@ dialog::backdrop {
 }
 
 .cal-day:hover {
-  background: #f1f2f4;
+  background: var(--subtle);
 }
 
 .cal-day.other {
-  color: #c4c8cf;
+  color: var(--faint);
 }
 
 .cal-day.today .num {
   font-weight: 800;
-  color: var(--primary);
+  color: var(--text);
 }
 
 .cal-day.selected,
 .cal-day.selected:hover {
-  color: #fff;
+  color: var(--text);
   background: var(--primary);
 }
 
 .cal-day.selected .num {
-  color: #fff;
+  color: var(--text);
 }
 
 .cal-dots {
@@ -1151,7 +1163,7 @@ dialog::backdrop {
 .ev-due { background: var(--primary); }
 .ev-soon { background: var(--soon); }
 .ev-overdue { background: var(--overdue); }
-.ev-done { background: #b8bdc6; }
+.ev-done { background: var(--faint); }
 
 .cal-legend {
   display: flex;
@@ -1207,7 +1219,7 @@ dialog::backdrop {
   font-size: 0.88rem;
   text-align: left;
   color: var(--text);
-  background: #f9fafb;
+  background: var(--yellow);
   border: 1px solid var(--line);
   border-radius: 8px;
   cursor: pointer;
@@ -1222,7 +1234,7 @@ dialog::backdrop {
   padding: 2px 6px;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text);
   border-radius: 5px;
 }
 
@@ -1256,8 +1268,8 @@ dialog::backdrop {
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
-  color: #b4bac4;
-  background: #e9ecf1;
+  color: var(--faint);
+  background: var(--primary-soft);
   border-radius: 14px;
 }
 
@@ -1316,7 +1328,7 @@ dialog::backdrop {
 }
 
 .profile-gear:hover {
-  color: var(--primary);
+  color: var(--text);
 }
 
 .profile-gear svg {
@@ -1345,7 +1357,7 @@ dialog::backdrop {
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #4b5563; /* 진회색 */
+  color: var(--text); /* 진회색 */
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1353,7 +1365,7 @@ dialog::backdrop {
 }
 
 .mypage-btn:hover {
-  border-color: #c9ced6;
+  border-color: var(--line-strong);
 }
 
 .mypage-btn .caret {
@@ -1388,7 +1400,7 @@ dialog::backdrop {
 }
 
 .mypage-menu button:hover {
-  background: #f1f2f4;
+  background: var(--subtle);
 }
 
 .mobile-foot {
@@ -1417,7 +1429,7 @@ dialog::backdrop {
 /* 휴대폰 필터 줄 오른쪽 "+ 새 협찬" */
 .filters .filter-add {
   margin-left: auto;
-  color: #fff;
+  color: var(--text);
   background: var(--primary);
   border-color: var(--primary);
 }
@@ -1433,7 +1445,7 @@ dialog::backdrop {
   max-height: 220px; /* 태블릿처럼 넓은 화면에서 너무 커지지 않게 */
   width: 100%;
   overflow: hidden;
-  background: #e9ecf1;
+  background: var(--primary-soft);
   border: 1px solid var(--line); /* 달력 카드와 같은 테두리·모서리 → 너비가 똑같아 보이게 */
   border-radius: 12px;
 }
@@ -1522,7 +1534,7 @@ dialog::backdrop {
 }
 
 .credit a:hover {
-  color: var(--primary);
+  color: var(--text);
   text-decoration: underline;
 }
 
@@ -1670,4 +1682,33 @@ dialog::backdrop {
   .topbar .btn {
     padding: 8px 10px;
   }
+}
+
+
+/* ===== 색 배치 보완 (팔레트) ===== */
+/* 주요 버튼: 하늘색 바탕은 그대로, 마우스를 올리면 살짝 진하게 */
+.btn-primary:hover,
+.filters .filter-add:hover {
+  filter: brightness(0.95);
+}
+
+/* 요약 숫자: 상태가 있으면 상자에 옅은 색 */
+/* 옅은 색은 흰 바탕 위에 겹쳐야 노란 페이지 색이 비치지 않음 */
+.stat.has-waiting { background: linear-gradient(var(--primary-soft), var(--primary-soft)), var(--card); }
+.stat.has-soon { background: linear-gradient(var(--soon-soft), var(--soon-soft)), var(--card); }
+.stat.has-overdue { background: var(--pink); }
+
+/* 달력 오늘: 하늘색 테두리 (선택한 날은 하늘색 바탕) */
+.cal-day.today:not(.selected) {
+  box-shadow: inset 0 0 0 1.5px var(--primary);
+}
+
+/* 글씨 링크는 진한 글씨 + 밑줄로 구분 */
+.post-list a,
+.links a,
+.apply-amount {
+  text-decoration: underline;
+  text-decoration-color: var(--primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
