@@ -798,7 +798,7 @@ function summaryHtml(list) {
   return `
     <div class="stat"><b>${active.length}</b><span>진행 중</span></div>
     <div class="stat ${waiting ? "has-waiting" : ""}"><b>${waiting}</b><span>배송 대기</span></div>
-    <div class="stat ${soon ? "has-soon" : ""}"><b>${soon}</b><span>3일 내 마감</span></div>
+    <div class="stat stat-soon ${soon ? "has-soon" : ""}"><b>${soon}</b><span>3일 내 마감</span></div>
     <div class="stat ${overdue ? "has-overdue" : ""}"><b>${overdue}</b><span>마감 지남</span></div>`;
 }
 
