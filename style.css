@@ -1163,8 +1163,9 @@ dialog::backdrop {
   color: var(--muted);
 }
 
-.cal-wd:first-child { color: var(--muted); }
-.cal-wd:nth-child(7) { color: var(--muted); }
+/* 요일 머리글: 일·토는 빨강 */
+.cal-wd:first-child { color: var(--urgent); }
+.cal-wd:nth-child(7) { color: var(--urgent); }
 
 .cal-day {
   display: flex;
@@ -1188,6 +1189,15 @@ dialog::backdrop {
 
 .cal-day.other {
   color: var(--faint);
+}
+
+/* 주말·공휴일 날짜는 빨강 (앞뒤 달 날짜는 흐리게, 선택한 날은 흰 글씨 그대로) */
+.cal-day.red:not(.selected) .num {
+  color: var(--urgent);
+}
+
+.cal-day.other.red .num {
+  opacity: 0.45;
 }
 
 .cal-day.today .num {

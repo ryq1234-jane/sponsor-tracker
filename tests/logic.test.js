@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, authScreenFromHash, friendlyError, avatarHtml, checkAvatarFile, profileBannerHtml, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, isRedDay, authScreenFromHash, friendlyError, avatarHtml, checkAvatarFile, profileBannerHtml, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -183,6 +183,16 @@ eq("PC 프로필에는 톱니바퀴", /class="profile-gear" data-open-info/.test
 eq("휴대폰 프로필에는 톱니바퀴 없음", /profile-gear/.test(t.profileBannerHtml({ nickname: "", avatar: null })), false);
 eq("닉네임은 사진 안에 (안전하게)", /<img[^>]*>\s*<p class="banner-name ">&lt;b&gt;수이/.test(t.profileBannerHtml({ nickname: "<b>수이", avatar: "data:image/webp;base64,AAAA" }, true)), true);
 eq("사진 없으면 빈 사람 모양 줄", /banner no-photo/.test(pc1), true);
+
+// 빨간 날 (주말·공휴일)
+eq("일요일은 빨간 날", t.isRedDay("2026-11-29"), true);
+eq("토요일은 빨간 날", t.isRedDay("2026-11-28"), true);
+eq("평일은 아님", t.isRedDay("2026-11-25"), false);
+eq("추석 연휴(목)는 빨간 날", t.isRedDay("2026-09-24"), true);
+eq("대체공휴일(월)도 빨간 날", t.isRedDay("2026-10-05"), true);
+const dec = t.calendarHtml([], 2026, 11, "2026-12-01");
+eq("성탄절 칸에 빨강 표시와 이름", /cal-day red" data-cal-date="2026-12-25" title="성탄절"/.test(dec), true);
+eq("평일 칸에는 빨강 없음", /class="cal-day" data-cal-date="2026-12-24"/.test(dec), true);
 
 console.log(fail ? `\n${fail}개 실패` : "\n모두 통과");
 process.exit(fail ? 1 : 0);
