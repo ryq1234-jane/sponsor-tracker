@@ -1222,7 +1222,7 @@ dialog::backdrop {
 .ev-due { background: var(--primary); }
 .ev-soon { background: var(--urgent); } /* 3일 내 마감 점: 빨강 */
 .ev-overdue { background: var(--overdue); }
-.ev-done { background: var(--faint); }
+.ev-done { background: #30AFFF; } /* 완료된 리뷰 마감 점: 파랑 ("+ 새 협찬"과 같은 색) */
 
 .cal-legend {
   display: flex;
