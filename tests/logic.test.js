@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, isRedDay, authScreenFromHash, friendlyError, avatarHtml, checkAvatarFile, profileBannerHtml, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, isRedDay, applyChipLabel, authScreenFromHash, friendlyError, avatarHtml, checkAvatarFile, profileBannerHtml, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -100,7 +100,7 @@ eq("유가 협찬 체크 안 했으면 금액 숨김", /apply-amount/.test(t.car
 eq("제안 받음 태그", /<span class="origin origin-offered">제안 받음<\/span>/.test(t.cardHtml({ ...three, id: "o1", origin: "offered" })), true);
 eq("직접 신청 태그", /<span class="origin origin-applied">직접 신청<\/span>/.test(t.cardHtml({ ...three, id: "o2", origin: "applied" })), true);
 eq("경로 없거나 이상한 값이면 태그 없음", /class="origin/.test(t.cardHtml({ ...three, id: "o3" })) || /class="origin/.test(t.cardHtml({ ...three, id: "o4", origin: "<b>x" })), false);
-eq("신청 종류 버튼 이름은 '협찬'", /aria-controls="apply-ap">협찬<\/button>/.test(ac), true);
+eq("종류를 안 골랐으면 버튼 이름은 '협찬'", /aria-controls="apply-n0">협찬<\/button>/.test(t.cardHtml({ ...three, id: "n0", apply_types: [] })), true);
 t.expandedLists.add("apply-ap");
 eq("펼친 신청 종류는 다시 그려도 펼친 상태", /id="apply-ap"\s+>/.test(t.cardHtml({ ...three, id: "ap" })), true);
 
@@ -193,6 +193,12 @@ eq("대체공휴일(월)도 빨간 날", t.isRedDay("2026-10-05"), true);
 const dec = t.calendarHtml([], 2026, 11, "2026-12-01");
 eq("성탄절 칸에 빨강 표시와 이름", /cal-day red" data-cal-date="2026-12-25" title="성탄절"/.test(dec), true);
 eq("평일 칸에는 빨강 없음", /class="cal-day" data-cal-date="2026-12-24"/.test(dec), true);
+
+// 협찬 버튼에 체크한 종류 표시
+eq("종류 없으면 '협찬'", t.applyChipLabel([]), "협찬");
+eq("하나면 그 이름", t.applyChipLabel(["제품 제공"]), "제품 제공");
+eq("둘 다면 줄여서", t.applyChipLabel(["제품 제공", "유가 협찬"]), "제품·유가");
+eq("카드 버튼에 반영", /aria-controls="apply-ap">유가 협찬<\/button>/.test(t.cardHtml({ ...three, id: "ap", apply_types: ["유가 협찬"] })), true);
 
 console.log(fail ? `\n${fail}개 실패` : "\n모두 통과");
 process.exit(fail ? 1 : 0);

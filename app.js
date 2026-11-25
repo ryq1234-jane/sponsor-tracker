@@ -166,6 +166,13 @@ function getPosts(it) {
 const postLabel = (p, i) => p.label || `게시물 ${i + 1}`;
 
 // 신청 종류 (신청의 하위 메뉴). 저장할 땐 체크한 이름만 ["제품 제공", "유가 협찬"]
+// 카드의 협찬 버튼 글씨: 체크한 종류를 보여 줌 (하나면 그 이름, 둘 다면 줄여서, 없으면 "협찬")
+function applyChipLabel(types) {
+  if (types.length === 1) return types[0];
+  if (types.length > 1) return types.map((t) => t.split(" ")[0]).join("·"); // "제품·유가"
+  return "협찬";
+}
+
 const APPLY_TYPES = ["제품 제공", "유가 협찬"];
 const PAID_TYPE = "유가 협찬"; // 이 종류에만 금액(원) 입력칸
 
@@ -763,7 +770,7 @@ function cardHtml(it) {
 
       <div class="checks-row">
         <button type="button" class="chip review-chip ${it.applied ? "on" : ""}"
-          data-list-toggle="apply-${it.id}" aria-expanded="${applyOpen}" aria-controls="apply-${it.id}">협찬</button>
+          data-list-toggle="apply-${it.id}" aria-expanded="${applyOpen}" aria-controls="apply-${it.id}">${applyChipLabel(applied)}</button>
         ${step("selected", "선정")}
         ${step("received", "수령")}
         <!-- 리뷰: 왼쪽 동그라미 없이, 다 끝나면 "리뷰 ✓", 아니면 "리뷰 1/3" -->
