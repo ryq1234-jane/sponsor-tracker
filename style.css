@@ -1280,6 +1280,7 @@ dialog::backdrop {
 
 .cal-list ul {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* 제목이 길어도 달력 상자 밖으로 안 나가게 */
   gap: 6px;
   margin: 0;
   padding: 0;
@@ -1292,8 +1293,13 @@ dialog::backdrop {
   color: var(--muted);
 }
 
+.cal-list li {
+  min-width: 0;
+}
+
 .cal-event {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 8px;
   width: 100%;
