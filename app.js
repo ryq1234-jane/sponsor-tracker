@@ -785,21 +785,19 @@ function cardHtml(it) {
     </article>`;
 }
 
-// 요약 숫자 4개 (달력 안 "리뷰 마감 · 완료" 아래 작은 상자)
+// 요약 숫자 3개 (달력 안 "리뷰 마감 · 완료" 아래 작은 상자) — "마감 지남"은 사용자 요청으로 뺌
 function summaryHtml(list) {
   const active = list.filter((it) => !isClosed(it));
   const soon = active.filter((it) => {
     const d = daysFromToday(it.review_due);
     return d !== null && d >= 0 && d <= 3;
   }).length;
-  const overdue = active.filter((it) => daysFromToday(it.review_due) < 0).length;
   const waiting = active.filter((it) => it.selected && !it.received).length;
 
   return `
     <div class="stat"><b>${active.length}</b><span>진행 중</span></div>
     <div class="stat ${waiting ? "has-waiting" : ""}"><b>${waiting}</b><span>배송 대기</span></div>
-    <div class="stat stat-soon ${soon ? "has-soon" : ""}"><b>${soon}</b><span>3일 내 마감</span></div>
-    <div class="stat ${overdue ? "has-overdue" : ""}"><b>${overdue}</b><span>마감 지남</span></div>`;
+    <div class="stat stat-soon ${soon ? "has-soon" : ""}"><b>${soon}</b><span>3일 내 마감</span></div>`;
 }
 
 // ----- 일정 달력 -----

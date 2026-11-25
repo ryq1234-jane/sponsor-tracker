@@ -1243,10 +1243,10 @@ dialog::backdrop {
   box-shadow: 0 0 0 1.5px #fff;
 }
 
-/* PC 달력 안 작은 요약 숫자 (가로 4칸) */
+/* 달력 안 작은 요약 숫자 (가로 3칸) */
 .mini-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   margin-top: 12px;
 }
