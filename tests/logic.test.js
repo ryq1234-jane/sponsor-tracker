@@ -197,7 +197,7 @@ eq("평일 칸에는 빨강 없음", /class="cal-day" data-cal-date="2026-12-24"
 // 협찬 버튼에 체크한 종류 표시
 eq("종류 없으면 '협찬'", t.applyChipLabel([]), "협찬");
 eq("하나면 그 이름", t.applyChipLabel(["제품 제공"]), "제품 제공");
-eq("둘 다면 줄여서", t.applyChipLabel(["제품 제공", "유가 협찬"]), "제품·유가");
+eq("둘 다면 '유가 협찬'만", t.applyChipLabel(["제품 제공", "유가 협찬"]), "유가 협찬");
 eq("카드 버튼에 반영", /aria-controls="apply-ap">유가 협찬<\/button>/.test(t.cardHtml({ ...three, id: "ap", apply_types: ["유가 협찬"] })), true);
 
 // 유가 협찬이면 협찬 버튼·목록 분홍(paid)

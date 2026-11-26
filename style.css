@@ -642,17 +642,20 @@ button {
     font-size: 0.8rem;
   }
 
-  /* 칸이 좁아 체크 네모는 숨김 — 체크한 협찬 종류는 진하게, 끝낸 게시물은 줄 긋기로 구분 */
+  /* 칸이 좁아 체크 네모를 조금 작게 (사용자 요청으로 휴대폰에도 다시 보이게) */
   .post-list .post-mark {
-    display: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
   }
 
-  .post-list.apply-list li:not(.done) .post-name {
-    opacity: 0.5;
+  .post-list li.done .post-mark {
+    background-size: 11px;
   }
 
+  /* 금액·"보기 ↗"는 이름과 같은 위치에서 시작 (네모 14px + 간격 4px) */
   .post-list li > :nth-child(n + 3) {
-    padding-left: 0;
+    padding-left: 18px;
   }
 }
 

@@ -168,8 +168,9 @@ const postLabel = (p, i) => p.label || `게시물 ${i + 1}`;
 // 신청 종류 (신청의 하위 메뉴). 저장할 땐 체크한 이름만 ["제품 제공", "유가 협찬"]
 // 카드의 협찬 버튼 글씨: 체크한 종류를 보여 줌 (하나면 그 이름, 둘 다면 줄여서, 없으면 "협찬")
 function applyChipLabel(types) {
-  if (types.length === 1) return types[0];
-  if (types.length > 1) return types.map((t) => t.split(" ")[0]).join("·"); // "제품·유가"
+  // 유가 협찬이면 제품은 당연히 따라오므로 "유가 협찬"만 표시 (사용자 요청)
+  if (types.includes(PAID_TYPE)) return PAID_TYPE;
+  if (types.length) return types[0];
   return "협찬";
 }
 
