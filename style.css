@@ -6,6 +6,8 @@
   --soft-text: #8A8F98;
   /* 체크된 단계 버튼(✓)과 그 아래 펼친 목록 바탕 (사용자 지정) */
   --chip-on: #F0FFDF;
+  /* 유가 협찬일 때 협찬 버튼·펼친 목록 바탕: 연두(--chip-on)와 같은 밝기의 분홍 (사용자 요청) */
+  --chip-paid: #FFDFEA;
   /* 체크 안 된 버튼·펼친 목록 바탕: 흰색 위에 옅은 회색 (분홍 카드 위에서도 같은 색) */
   --chip-off: linear-gradient(rgba(104, 109, 118, 0.07), rgba(104, 109, 118, 0.07)), #FFFFFF;
   /* 무채색 단계 (밝은 것 → 진한 것) */
@@ -605,6 +607,13 @@ button {
 .post-list li.done .post-name {
   color: var(--text);
   text-decoration: line-through;
+}
+
+/* 유가 협찬 → 협찬 버튼과 펼친 목록(위쪽 작은 화살표 포함)을 분홍으로 */
+.chip.on.paid,
+.post-list.on.paid,
+.post-list.on.paid::before {
+  background: var(--chip-paid);
 }
 
 /* 신청 종류 목록: 화살표는 "신청" 버튼(1번째 칸)을 가리키고, 체크한 종류는 줄 긋지 않고 진하게 */

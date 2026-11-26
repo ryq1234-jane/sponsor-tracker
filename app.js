@@ -697,8 +697,10 @@ function cardHtml(it) {
   // "신청" 버튼을 누르면 아래로 펼쳐지는 신청 종류 (표시만)
   const applyOpen = expandedLists.has(`apply-${it.id}`);
   const applied = getApplyTypes(it);
+  // 유가 협찬을 체크했으면 협찬 버튼·펼친 목록을 분홍으로
+  const paidCls = it.applied && applied.includes(PAID_TYPE) ? " paid" : "";
   const applyList = `
-    <ul class="post-list apply-list ${it.applied ? "on" : ""}" id="apply-${it.id}" ${applyOpen ? "" : "hidden"}>
+    <ul class="post-list apply-list ${it.applied ? "on" : ""}${paidCls}" id="apply-${it.id}" ${applyOpen ? "" : "hidden"}>
       ${APPLY_TYPES.map((type) => `
         <li class="${applied.includes(type) ? "done" : ""}">
           <span class="post-mark" aria-label="${applied.includes(type) ? "신청함" : "신청 안 함"}"></span>
@@ -769,7 +771,7 @@ function cardHtml(it) {
       </dl>` : ""}
 
       <div class="checks-row">
-        <button type="button" class="chip review-chip ${it.applied ? "on" : ""}"
+        <button type="button" class="chip review-chip ${it.applied ? "on" : ""}${paidCls}"
           data-list-toggle="apply-${it.id}" aria-expanded="${applyOpen}" aria-controls="apply-${it.id}">${applyChipLabel(applied)}</button>
         ${step("selected", "선정")}
         ${step("received", "수령")}

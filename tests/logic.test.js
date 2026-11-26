@@ -91,7 +91,7 @@ const ac = t.cardHtml({ ...three, id: "ap", apply_types: ["유가 협찬"] });
 eq("신청 버튼이 신청 종류 목록을 여닫음", /data-list-toggle="apply-ap"/.test(ac) && /aria-controls="apply-ap"/.test(ac), true);
 eq("신청 종류 목록은 처음엔 접혀 있음", /id="apply-ap"\s+hidden/.test(ac), true);
 eq("두 종류 모두 표시, 유가 협찬만 체크", /<li class="">\s*<span[^>]*><\/span>\s*<span class="post-name">제품 제공/.test(ac) && /<li class="done">\s*<span[^>]*><\/span>\s*<span class="post-name">유가 협찬/.test(ac), true);
-eq("신청 칩은 신청 상태면 체크 표시", /review-chip on"\s+data-list-toggle="apply-ap"/.test(ac), true);
+eq("신청 칩은 신청 상태면 체크 표시", /review-chip on( paid)?"\s+data-list-toggle="apply-ap"/.test(ac), true);
 eq("금액 읽기: 쉼표·원 무시", t.parseWon("300,000원"), 300000);
 eq("금액 읽기: 숫자 없으면 비움", t.parseWon("금액"), null);
 eq("금액 표시: 세 자리 쉼표", t.formatWon(1500000), "1,500,000");
@@ -199,6 +199,12 @@ eq("종류 없으면 '협찬'", t.applyChipLabel([]), "협찬");
 eq("하나면 그 이름", t.applyChipLabel(["제품 제공"]), "제품 제공");
 eq("둘 다면 줄여서", t.applyChipLabel(["제품 제공", "유가 협찬"]), "제품·유가");
 eq("카드 버튼에 반영", /aria-controls="apply-ap">유가 협찬<\/button>/.test(t.cardHtml({ ...three, id: "ap", apply_types: ["유가 협찬"] })), true);
+
+// 유가 협찬이면 협찬 버튼·목록 분홍(paid)
+const paidCard = t.cardHtml({ ...three, id: "pd", apply_types: ["제품 제공", "유가 협찬"] });
+eq("유가 협찬 → 협찬 버튼 분홍", /class="chip review-chip on paid"/.test(paidCard), true);
+eq("유가 협찬 → 펼친 목록도 분홍", /apply-list on paid"/.test(paidCard), true);
+eq("제품 제공만이면 분홍 아님", /paid/.test(t.cardHtml({ ...three, id: "pp", apply_types: ["제품 제공"] })), false);
 
 console.log(fail ? `\n${fail}개 실패` : "\n모두 통과");
 process.exit(fail ? 1 : 0);
