@@ -667,7 +667,29 @@ function matchesFilter(it) {
   if (filter === "active") return !isClosed(it);
   if (filter === "applied") return stage === "planned" || stage === "applied";
   if (filter === "done") return isClosed(it);
-  return true;
+  return inPeriod(it, periodFrom, periodTo); // "전체": 기간을 고르면 그 사이 리뷰 마감만
+}
+
+// ----- "전체"의 기간별 조회 (리뷰 마감일 기준) -----
+let periodFrom = ""; // "2026-11-01" 처럼, 비어 있으면 제한 없음
+let periodTo = "";
+
+// 기간을 하나라도 정하면 마감일이 없는 협찬은 빠짐
+function inPeriod(it, from, to) {
+  if (!from && !to) return true;
+  if (!it.review_due) return false;
+  return (!from || it.review_due >= from) && (!to || it.review_due <= to);
+}
+
+// 이번 달(0), 지난 달(-1)의 첫날~마지막 날
+function monthRange(offset = 0, base = new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  const first = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+  const last = new Date(base.getFullYear(), base.getMonth() + offset + 1, 0);
+  return [
+    `${first.getFullYear()}-${pad(first.getMonth() + 1)}-01`,
+    `${last.getFullYear()}-${pad(last.getMonth() + 1)}-${pad(last.getDate())}`,
+  ];
 }
 
 // 리뷰 마감 D-day 표시
@@ -707,6 +729,7 @@ function cardHtml(it) {
           <span class="post-mark" aria-label="${applied.includes(type) ? "신청함" : "신청 안 함"}"></span>
           <span class="post-name">${type}</span>
           ${type === PAID_TYPE && applied.includes(type) && it.paid_amount ? `<span class="apply-amount">${formatWon(it.paid_amount)}원</span>` : ""}
+          ${type === PAID_TYPE && applied.includes(type) ? `<span class="deposit-tag ${it.deposited ? "is-done" : ""}">${it.deposited ? "입금 완료" : "입금 전"}</span>` : ""}
         </li>`).join("")}
     </ul>`;
 
@@ -994,14 +1017,22 @@ window.matchMedia?.("(min-width: 1024px)").addEventListener?.("change", (e) => {
 
 function render() {
   renderCalendars();
+  if (settleDialog?.open) renderSettle();
 
   const shown = sortItems(items.filter(matchesFilter));
   list.innerHTML = shown.map(cardHtml).join("");
   restoreMemoSlides();
   updateMemoToggles();
 
+  // "전체"에서만 기간 조회 줄 보이기
+  const periodOn = filter === "all" && !!(periodFrom || periodTo);
+  periodBar.hidden = filter !== "all";
+  periodCount.textContent = periodOn ? `${shown.length}건` : "";
+
   emptyMessage.hidden = shown.length > 0;
-  emptyMessage.textContent = items.length
+  emptyMessage.textContent = periodOn && items.length
+    ? "이 기간에 리뷰 마감인 협찬이 없어요."
+    : items.length
     ? "이 목록에는 아직 항목이 없어요."
     : "아직 등록한 협찬이 없어요. 오른쪽 위 \"+ 새 협찬\"으로 추가해 보세요.";
 
@@ -1099,8 +1130,175 @@ filterButtons.forEach((btn) => {
   });
 });
 
+const periodBar = $("periodBar");
+const periodCount = $("periodCount");
+const periodFromInput = $("periodFrom");
+const periodToInput = $("periodTo");
+
+function setPeriod(from, to) {
+  periodFrom = from;
+  periodTo = to;
+  periodFromInput.value = from;
+  periodToInput.value = to;
+  render();
+}
+
+periodFromInput.addEventListener("change", () => setPeriod(periodFromInput.value, periodToInput.value));
+periodToInput.addEventListener("change", () => setPeriod(periodFromInput.value, periodToInput.value));
+periodBar.addEventListener("click", (e) => {
+  const kind = e.target.closest("[data-period]")?.dataset.period;
+  if (kind === "this") setPeriod(...monthRange(0));
+  if (kind === "last") setPeriod(...monthRange(-1));
+  if (kind === "clear") setPeriod("", "");
+});
+
+// ----- 월별 정산 (리뷰를 완료한 달 기준) -----
+// 리뷰 완료일이 없는 예전 기록은 리뷰 마감일 → 마지막 수정일 순으로 대신 씀 (guessed)
+function settleDate(it) {
+  if (!it.reviewed || it.rejected) return null;
+  if (it.reviewed_date) return { date: it.reviewed_date, guessed: false };
+  const date = it.review_due || (it.updated_at || it.created_at || "").slice(0, 10);
+  return date ? { date, guessed: true } : null;
+}
+
+// 한 해의 달별 합계 + 아직 리뷰 전인 유가 협찬(정산 예정)
+function settlement(list, year) {
+  const months = {};
+  const total = { amount: 0, deposited: 0, paidCount: 0, productCount: 0 };
+  const upcoming = { count: 0, amount: 0 };
+  let guessed = 0;
+
+  list.forEach((it) => {
+    const paid = getApplyTypes(it).includes(PAID_TYPE);
+    const amount = paid ? Number(it.paid_amount) || 0 : 0;
+    const s = settleDate(it);
+    if (!s) {
+      // 선정됐지만 리뷰 전인 유가 협찬 = 정산 예정
+      if (paid && it.selected && !it.reviewed && !it.rejected) {
+        upcoming.count++;
+        upcoming.amount += amount;
+      }
+      return;
+    }
+    if (!s.date.startsWith(`${year}-`)) return;
+    const month = Number(s.date.slice(5, 7));
+    const row = (months[month] ||= { month, amount: 0, deposited: 0, paidCount: 0, productCount: 0, entries: [] });
+    if (paid) {
+      row.paidCount++;
+      row.amount += amount;
+      if (it.deposited) row.deposited += amount;
+    } else {
+      row.productCount++;
+    }
+    row.entries.push({ it, paid, amount, date: s.date, guessed: s.guessed });
+    if (s.guessed) guessed++;
+  });
+
+  const rows = Object.values(months).sort((a, b) => b.month - a.month); // 최근 달이 위
+  rows.forEach((r) => {
+    r.entries.sort((a, b) => b.date.localeCompare(a.date));
+    total.amount += r.amount;
+    total.deposited += r.deposited;
+    total.paidCount += r.paidCount;
+    total.productCount += r.productCount;
+  });
+  return { rows, total, upcoming, guessed };
+}
+
+let settleYear = new Date().getFullYear();
+const openSettleMonths = new Set(); // 펼쳐 둔 달 ("2026-11")
+
+function settleHtml(list, year) {
+  const { rows, total, upcoming, guessed } = settlement(list, year);
+  const won = (n) => `${formatWon(n)}원`;
+
+  const monthsHtml = rows.map((r) => {
+    const key = `${year}-${r.month}`;
+    const left = r.amount - r.deposited;
+    const counts = [r.paidCount && `유가 ${r.paidCount}건`, r.productCount && `제품 ${r.productCount}건`].filter(Boolean).join(" · ");
+    return `
+      <details class="settle-month" data-settle-month="${key}" ${openSettleMonths.has(key) ? "open" : ""}>
+        <summary>
+          <span class="settle-m">${r.month}월</span>
+          <span class="settle-counts">${counts}</span>
+          <span class="settle-amount">
+            <b>${won(r.amount)}</b>
+            ${left > 0 ? `<small class="settle-left">입금 전 ${won(left)}</small>` : r.amount ? `<small>입금 완료</small>` : ""}
+          </span>
+        </summary>
+        <ul class="settle-items">
+          ${r.entries.map((e) => `
+            <li>
+              <button type="button" class="settle-item" data-settle-edit="${e.it.id}">
+                <span class="settle-date">${formatDate(e.date)}${e.guessed ? "*" : ""}</span>
+                <span class="settle-title">${esc(e.it.title)}</span>
+                <span class="settle-pay">${e.paid
+                  ? `${e.amount ? won(e.amount) : "금액 미입력"} <em class="deposit-tag ${e.it.deposited ? "is-done" : ""}">${e.it.deposited ? "입금 완료" : "입금 전"}</em>`
+                  : "제품 제공"}</span>
+              </button>
+            </li>`).join("")}
+        </ul>
+      </details>`;
+  }).join("");
+
+  return `
+    <div class="settle-year">
+      <button type="button" class="icon-btn" data-settle-year="-1" aria-label="이전 해">‹</button>
+      <b>${year}년</b>
+      <button type="button" class="icon-btn" data-settle-year="1" aria-label="다음 해">›</button>
+    </div>
+    <p class="settle-note">리뷰를 완료한 달 기준이에요. 달을 누르면 협찬 목록이 보여요.</p>
+
+    <div class="settle-total">
+      <div class="stat"><b>${formatWon(total.amount)}</b><span>유가 협찬 합계(원)</span></div>
+      <div class="stat"><b>${formatWon(total.deposited)}</b><span>입금 완료(원)</span></div>
+      <div class="stat ${total.amount - total.deposited > 0 ? "stat-left" : ""}"><b>${formatWon(total.amount - total.deposited)}</b><span>입금 전(원)</span></div>
+    </div>
+    <p class="settle-sub">유가 협찬 ${total.paidCount}건 · 제품 제공 ${total.productCount}건</p>
+
+    ${upcoming.count ? `<p class="settle-upcoming">리뷰 전 유가 협찬 ${upcoming.count}건 · ${won(upcoming.amount)} <small>(리뷰를 마치면 그 달에 들어가요)</small></p>` : ""}
+
+    ${rows.length ? `<div class="settle-months">${monthsHtml}</div>` : `<p class="settle-empty">${year}년에 리뷰를 완료한 협찬이 없어요.</p>`}
+
+    ${guessed ? `<p class="settle-note">* 리뷰 완료일이 없는 예전 기록 ${guessed}건은 리뷰 마감일의 달로 넣었어요. 눌러서 수정 창의 "리뷰 완료일"을 넣으면 정확해져요.</p>` : ""}`;
+}
+
+const settleDialog = $("settleDialog");
+const settleBody = $("settleBody");
+
+function renderSettle() {
+  settleBody.innerHTML = settleHtml(items, settleYear);
+}
+
+document.querySelectorAll("[data-open-settle]").forEach((b) => b.addEventListener("click", () => {
+  closeMypageMenus();
+  settleYear = new Date().getFullYear();
+  renderSettle();
+  settleDialog.showModal();
+}));
+$("settleClose").addEventListener("click", () => settleDialog.close());
+
+settleBody.addEventListener("click", (e) => {
+  const yearBtn = e.target.closest("[data-settle-year]");
+  if (yearBtn) {
+    settleYear += Number(yearBtn.dataset.settleYear);
+    renderSettle();
+    return;
+  }
+  const editBtn = e.target.closest("[data-settle-edit]");
+  if (editBtn) openEditor(items.find((it) => it.id === editBtn.dataset.settleEdit));
+});
+
+// 펼친 달 기억 (저장 후 다시 그려도 그대로)
+settleBody.addEventListener("toggle", (e) => {
+  const key = e.target.dataset?.settleMonth;
+  if (!key) return;
+  if (e.target.open) openSettleMonths.add(key);
+  else openSettleMonths.delete(key);
+}, true);
+
 // ===== 8. 추가 / 수정 창 =====
-const TEXT_FIELDS = ["title", "platform", "offer", "received_date", "review_days", "review_due", "recruit_url"];
+const TEXT_FIELDS = ["title", "platform", "offer", "received_date", "review_days", "review_due", "reviewed_date", "recruit_url"];
 const MAX_POSTS = 10;
 const MAX_MEMOS = 20;
 
@@ -1162,6 +1360,14 @@ function syncReviewedFromPosts() {
   const allDone = formPosts.every((p) => p.done);
   if (editForm.elements.reviewed.checked === allDone) return;
   Object.entries(cascade("reviewed", allDone)).forEach(([k, v]) => (editForm.elements[k].checked = v));
+  syncReviewedDate();
+}
+
+// "리뷰 작성" 체크 → 리뷰 완료일이 비어 있으면 오늘, 해제 → 완료일 지움 (월별 정산 기준)
+function syncReviewedDate() {
+  const f = editForm.elements;
+  if (f.reviewed.checked && !f.reviewed_date.value) f.reviewed_date.value = todayStr();
+  if (!f.reviewed.checked) f.reviewed_date.value = "";
 }
 
 function setPostCount(n) {
@@ -1196,11 +1402,13 @@ applyTypesBox.innerHTML = APPLY_TYPES.map((type) => `
     <span class="amount-input">
       <input type="text" id="paidAmount" inputmode="numeric" autocomplete="off" placeholder="금액" aria-label="유가 협찬 금액 (원)">
       <span>원</span>
-    </span>` : ""}
+    </span>
+    <label class="deposit-check"><input type="checkbox" id="deposited"> 입금 완료</label>` : ""}
   </span>`).join("");
 const applyTypeInputs = () => [...applyTypesBox.querySelectorAll("[data-apply-type]")];
 const paidAmount = $("paidAmount");
 const paidCheckbox = () => applyTypeInputs().find((cb) => cb.dataset.applyType === PAID_TYPE);
+const depositedInput = $("deposited");
 
 // 종류를 하나라도 체크하면 "협찬"(신청)도 자동 체크 (해제할 땐 그대로 둠)
 function checkApplied() {
@@ -1210,6 +1418,13 @@ function checkApplied() {
 
 applyTypesBox.addEventListener("change", (e) => {
   if (e.target.dataset.applyType !== undefined && e.target.checked) checkApplied();
+  // 유가 협찬을 해제하면 입금 완료도 해제
+  if (e.target.dataset.applyType === PAID_TYPE && !e.target.checked) depositedInput.checked = false;
+  // 입금 완료를 체크하면 유가 협찬·협찬도 자동 체크
+  if (e.target === depositedInput && e.target.checked) {
+    paidCheckbox().checked = true;
+    checkApplied();
+  }
 });
 
 // 경로(직접 신청 / 제안 받음)를 고르면 "협찬"도 자동 체크
@@ -1244,6 +1459,7 @@ function openEditor(item = null) {
   const types = getApplyTypes(item);
   applyTypeInputs().forEach((cb) => (cb.checked = types.includes(cb.dataset.applyType)));
   paidAmount.value = item?.paid_amount ? formatWon(item.paid_amount) : "";
+  depositedInput.checked = !!item?.deposited;
   originInputs().forEach((r) => (r.checked = r.value === item?.origin));
 
   formPosts = getPosts(item).map((p) => ({ label: p.label || "", url: p.url || "", done: !!p.done }));
@@ -1266,11 +1482,12 @@ CHECK_FIELDS.forEach((f) => {
     const changes = cascade(f, e.target.checked);
     Object.entries(changes).forEach(([k, v]) => (editForm.elements[k].checked = v));
     // "신청"을 해제하면 신청 종류도 모두 해제
-    if (changes.applied === false) [...applyTypeInputs(), ...originInputs()].forEach((cb) => (cb.checked = false));
+    if (changes.applied === false) [...applyTypeInputs(), ...originInputs(), depositedInput].forEach((cb) => (cb.checked = false));
     // "리뷰 작성"이 바뀌면 게시물 체크도 모두 같이
     if ("reviewed" in changes) {
       formPosts.forEach((p) => (p.done = changes.reviewed));
       renderPostRows();
+      syncReviewedDate();
     }
     // 수령 체크 시 수령일이 비어 있으면 오늘로
     if (changes.received && !editForm.elements.received_date.value) {
@@ -1292,6 +1509,13 @@ function autoFillDue() {
 
 editForm.elements.received_date.addEventListener("input", autoFillDue);
 editForm.elements.review_days.addEventListener("input", autoFillDue);
+editForm.elements.reviewed_date.addEventListener("input", () => {
+  if (!editForm.elements.reviewed_date.value || editForm.elements.reviewed.checked) return;
+  Object.entries(cascade("reviewed", true)).forEach(([k, v]) => (editForm.elements[k].checked = v));
+  formPosts.forEach((p) => (p.done = true));
+  renderPostRows();
+});
+
 editForm.elements.review_due.addEventListener("input", () => {
   dueEditedByHand = editForm.elements.review_due.value !== "";
 });
@@ -1314,6 +1538,8 @@ editForm.addEventListener("submit", async (e) => {
   payload.origin = originInputs().find((r) => r.checked)?.value ?? null;
   // 금액은 "유가 협찬"을 체크했을 때만 저장
   payload.paid_amount = payload.apply_types.includes(PAID_TYPE) ? parseWon(paidAmount.value) : null;
+  payload.deposited = payload.apply_types.includes(PAID_TYPE) && depositedInput.checked;
+  if (!payload.reviewed) payload.reviewed_date = null; // 리뷰 전이면 완료일 없음
   payload.posts = formPosts.map((p) => ({ label: p.label.trim(), url: p.url.trim(), done: p.done }));
   payload.review_url = null; // 리뷰 주소는 이제 게시물마다 저장
   payload.memos = formMemos.map((m) => m.trim()).filter(Boolean); // 빈 메모는 빼고 저장

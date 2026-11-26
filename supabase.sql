@@ -19,11 +19,13 @@ create table if not exists public.sponsorships (
   received_date date,                  -- 수령일
   review_days  integer,                -- 수령 후 며칠 이내 리뷰 (예: 7)
   review_due   date,                   -- 리뷰 마감일
+  reviewed_date date,                  -- 리뷰 완료일 (월별 정산 기준)
 
   recruit_url  text,                   -- 모집 글 주소
   review_url   text,                   -- (예전 버전) 작성한 리뷰 주소 — 지금은 posts 사용
   apply_types  jsonb not null default '[]'::jsonb,  -- 신청 종류 ["제품 제공", "유가 협찬"] 중 체크한 것
   paid_amount  bigint,                 -- 유가 협찬 금액 (원)
+  deposited    boolean not null default false,  -- 유가 협찬 입금 완료
   origin       text,                   -- 경로: 'applied' 직접 신청 / 'offered' 제안 받음
   posts        jsonb not null default '[]'::jsonb,  -- 게시물 체크리스트 [{label, url, done}, ...]
   memo         text,                   -- (예전 버전) 메모 1개 — 지금은 memos 사용
@@ -49,6 +51,8 @@ alter table public.sponsorships add column if not exists memos jsonb not null de
 alter table public.sponsorships add column if not exists apply_types jsonb not null default '[]'::jsonb;
 alter table public.sponsorships add column if not exists paid_amount bigint;
 alter table public.sponsorships add column if not exists origin text;
+alter table public.sponsorships add column if not exists reviewed_date date;
+alter table public.sponsorships add column if not exists deposited boolean not null default false;
 alter table public.sponsorships drop column if exists visit_date;
 alter table public.sponsorships drop column if exists visit_time;
 

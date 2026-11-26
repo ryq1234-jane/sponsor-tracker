@@ -20,7 +20,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 const src = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, isRedDay, applyChipLabel, authScreenFromHash, friendlyError, avatarHtml, checkAvatarFile, profileBannerHtml, memoIndex, linkify };", ctx);
+vm.runInContext(src + "\n;globalThis.__t = { cascade, calcDue, addDays, daysFromToday, todayStr, sortItems, stageOf, cardHtml, esc, getPosts, getMemos, getApplyTypes, parseWon, formatWon, expandedMemos, expandedLists, calendarEvents, calendarHtml, eventClass, isRedDay, applyChipLabel, inPeriod, monthRange, settleDate, settlement, settleHtml, authScreenFromHash, friendlyError, avatarHtml, checkAvatarFile, profileBannerHtml, memoIndex, linkify };", ctx);
 const t = ctx.__t;
 
 let fail = 0;
@@ -205,6 +205,43 @@ const paidCard = t.cardHtml({ ...three, id: "pd", apply_types: ["제품 제공",
 eq("유가 협찬 → 협찬 버튼 분홍", /class="chip review-chip on paid"/.test(paidCard), true);
 eq("유가 협찬 → 펼친 목록도 분홍", /apply-list on paid"/.test(paidCard), true);
 eq("제품 제공만이면 분홍 아님", /paid/.test(t.cardHtml({ ...three, id: "pp", apply_types: ["제품 제공"] })), false);
+
+// 기간별 조회 (리뷰 마감일 기준)
+eq("기간 없으면 모두", t.inPeriod({ review_due: null }, "", ""), true);
+eq("기간 안", t.inPeriod({ review_due: "2026-11-15" }, "2026-11-01", "2026-11-30"), true);
+eq("시작일·종료일 당일 포함", t.inPeriod({ review_due: "2026-11-30" }, "2026-11-01", "2026-11-30") && t.inPeriod({ review_due: "2026-11-01" }, "2026-11-01", ""), true);
+eq("기간 밖", t.inPeriod({ review_due: "2026-12-01" }, "2026-11-01", "2026-11-30"), false);
+eq("기간 정하면 마감일 없는 건 빠짐", t.inPeriod({ review_due: null }, "2026-11-01", ""), false);
+eq("이번 달 범위", t.monthRange(0, new Date(2026, 10, 26)), ["2026-11-01", "2026-11-30"]);
+eq("지난 달 범위 (해 넘김)", t.monthRange(-1, new Date(2027, 0, 5)), ["2026-12-01", "2026-12-31"]);
+eq("2월 마지막 날", t.monthRange(0, new Date(2028, 1, 10)), ["2028-02-01", "2028-02-29"]);
+
+// 월별 정산 (리뷰 완료한 달 기준)
+eq("리뷰 전이면 정산 날짜 없음", t.settleDate({ reviewed: false, review_due: "2026-11-01" }), null);
+eq("리뷰 완료일 기준", t.settleDate({ reviewed: true, reviewed_date: "2026-11-03", review_due: "2026-10-30" }), { date: "2026-11-03", guessed: false });
+eq("완료일 없는 예전 기록은 마감일로 추정", t.settleDate({ reviewed: true, review_due: "2026-10-30" }), { date: "2026-10-30", guessed: true });
+const sl = [
+  { id: "s1", title: "A", reviewed: true, reviewed_date: "2026-11-03", apply_types: ["제품 제공", "유가 협찬"], paid_amount: 300000, deposited: true },
+  { id: "s2", title: "B", reviewed: true, reviewed_date: "2026-11-20", apply_types: ["유가 협찬"], paid_amount: 200000, deposited: false },
+  { id: "s3", title: "C", reviewed: true, reviewed_date: "2026-11-21", apply_types: ["제품 제공"] },
+  { id: "s4", title: "D", reviewed: true, review_due: "2026-10-05", apply_types: ["유가 협찬"], paid_amount: 100000 },
+  { id: "s5", title: "E", reviewed: true, reviewed_date: "2025-12-31", apply_types: ["유가 협찬"], paid_amount: 999 },
+  { id: "s6", title: "F", selected: true, apply_types: ["유가 협찬"], paid_amount: 50000 },
+  { id: "s7", title: "G", applied: true, apply_types: ["유가 협찬"], paid_amount: 70000 },
+];
+const st = t.settlement(sl, 2026);
+eq("달별로 나눔 (최근 달 위)", st.rows.map((r) => r.month), [11, 10]);
+eq("11월 합계·입금", [st.rows[0].amount, st.rows[0].deposited, st.rows[0].paidCount, st.rows[0].productCount], [500000, 300000, 2, 1]);
+eq("한 해 합계 (다른 해 제외)", st.total, { amount: 600000, deposited: 300000, paidCount: 3, productCount: 1 });
+eq("리뷰 전 유가 협찬 = 정산 예정 (선정된 것만)", st.upcoming, { count: 1, amount: 50000 });
+eq("추정한 예전 기록 수", st.guessed, 1);
+const sh = t.settleHtml(sl, 2026);
+eq("정산 화면: 입금 전 금액", /입금 전 200,000원/.test(sh), true);
+eq("정산 화면: 추정 안내", /예전 기록 1건/.test(sh), true);
+eq("정산 화면: 누르면 수정 창", /data-settle-edit="s2"/.test(sh), true);
+eq("빈 해 안내", /2024년에 리뷰를 완료한 협찬이 없어요/.test(t.settleHtml(sl, 2024)), true);
+eq("카드에 입금 여부", /입금 완료/.test(t.cardHtml({ ...three, id: "dp", apply_types: ["유가 협찬"], deposited: true })) && /입금 전/.test(t.cardHtml({ ...three, id: "dq", apply_types: ["유가 협찬"] })), true);
+eq("제품 제공만이면 입금 표시 없음", /입금/.test(t.cardHtml({ ...three, id: "dr", apply_types: ["제품 제공"] })), false);
 
 console.log(fail ? `\n${fail}개 실패` : "\n모두 통과");
 process.exit(fail ? 1 : 0);

@@ -1824,3 +1824,281 @@ dialog::backdrop {
 .ev-tag.ev-due {
   color: var(--on-primary);
 }
+
+/* ===== "전체" 탭: 기간별 조회 (리뷰 마감일 기준) ===== */
+.period-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.period-bar[hidden] {
+  display: none;
+}
+
+.period-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.period-label {
+  white-space: nowrap;
+}
+
+.period-range input {
+  min-width: 0;
+  padding: 5px 6px;
+  font: inherit;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.period-quick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.period-quick button {
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--soft-text);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.period-quick button:hover {
+  color: var(--text);
+}
+
+.period-count {
+  font-size: 0.85rem;
+  color: #30AFFF;
+}
+
+@media (max-width: 560px) {
+  .period-range {
+    width: 100%;
+  }
+
+  .period-range input {
+    flex: 1;
+  }
+}
+
+/* ===== 입금 여부 (카드 펼친 목록, 정산 창) ===== */
+.deposit-tag {
+  font-size: 0.75rem;
+  font-style: normal;
+  color: var(--soft-text);
+  white-space: nowrap;
+}
+
+.deposit-tag.is-done {
+  color: #30AFFF;
+}
+
+/* 수정 창: 유가 협찬 금액 옆 "입금 완료" */
+.apply-type {
+  flex-wrap: wrap;
+}
+
+.deposit-check {
+  font-size: 0.9rem;
+}
+
+/* ===== 월별 정산 창 ===== */
+.settle-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.settle-dialog .dialog-body {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.settle-year {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1.05rem;
+}
+
+.settle-note {
+  margin: 6px 0 14px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+  word-break: keep-all;
+}
+
+.settle-total {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.settle-total .stat {
+  padding: 10px 4px;
+  background: var(--bg);
+}
+
+.settle-total .stat b {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.settle-total .stat-left b {
+  color: var(--urgent);
+}
+
+.settle-sub {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.settle-upcoming {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+.settle-upcoming small {
+  color: var(--muted);
+}
+
+.settle-months {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.settle-month {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.settle-month summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.settle-month summary::-webkit-details-marker {
+  display: none;
+}
+
+.settle-month summary::after {
+  content: "▾";
+  font-size: 0.75rem;
+  color: var(--soft-text);
+}
+
+.settle-month[open] summary::after {
+  content: "▴";
+}
+
+.settle-m {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.settle-counts {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.settle-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.9rem;
+}
+
+.settle-amount b {
+  font-weight: 600;
+}
+
+.settle-amount small {
+  font-size: 0.72rem;
+  color: var(--soft-text);
+}
+
+.settle-amount .settle-left {
+  color: var(--urgent);
+}
+
+.settle-items {
+  margin: 0;
+  padding: 0 6px 6px;
+  list-style: none;
+  border-top: 1px dashed var(--line);
+}
+
+.settle-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 6px;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--text);
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.settle-item:hover {
+  background: var(--hover);
+}
+
+.settle-date {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.settle-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settle-pay {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.settle-empty {
+  margin: 24px 0 8px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: center;
+}
