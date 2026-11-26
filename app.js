@@ -1215,7 +1215,7 @@ function settleHtml(list, year) {
   const monthsHtml = rows.map((r) => {
     const key = `${year}-${r.month}`;
     const left = r.amount - r.deposited;
-    const counts = [r.paidCount && `유가 ${r.paidCount}건`, r.productCount && `제품 ${r.productCount}건`].filter(Boolean).join(" · ");
+    const counts = [r.productCount && `제품 ${r.productCount}건`, r.paidCount && `유가 ${r.paidCount}건`].filter(Boolean).join(" · ");
     return `
       <details class="settle-month" data-settle-month="${key}" ${openSettleMonths.has(key) ? "open" : ""}>
         <summary>
@@ -1254,7 +1254,7 @@ function settleHtml(list, year) {
       <div class="stat"><b>${formatWon(total.deposited)}</b><span>입금 완료(원)</span></div>
       <div class="stat ${total.amount - total.deposited > 0 ? "stat-left" : ""}"><b>${formatWon(total.amount - total.deposited)}</b><span>입금 전(원)</span></div>
     </div>
-    <p class="settle-sub">유가 협찬 ${total.paidCount}건 · 제품 제공 ${total.productCount}건</p>
+    <p class="settle-sub">제품 제공 ${total.productCount}건 · 유가 협찬 ${total.paidCount}건</p>
 
     ${upcoming.count ? `<p class="settle-upcoming">리뷰 전 유가 협찬 ${upcoming.count}건 · ${won(upcoming.amount)} <small>(리뷰를 마치면 그 달에 들어가요)</small></p>` : ""}
 
