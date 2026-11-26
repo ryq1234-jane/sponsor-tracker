@@ -374,7 +374,8 @@ button {
   border-radius: 12px;
 }
 
-.card.is-soon { border-left-color: var(--soon); }
+/* 3일 내 마감: 달력 점과 같은 빨강 (사용자 요청) */
+.card.is-soon { border-left-color: var(--urgent); }
 .card.is-overdue { border-left-color: var(--overdue); background: linear-gradient(rgba(104, 109, 118, 0.04), rgba(104, 109, 118, 0.04)), var(--card); }
 .card.stage-done,
 .card.stage-rejected { opacity: 0.65; }
@@ -420,7 +421,7 @@ button {
   background: var(--subtle);
 }
 
-.dday.soon { color: var(--text); background: var(--soon-soft); }
+.dday.soon { color: var(--urgent); background: #FDE7E8; } /* 3일 내 마감: 연한 빨강 바탕 + 빨강 글씨 */
 .dday.overdue { color: var(--text); background: var(--overdue); }
 
 .card-title {
