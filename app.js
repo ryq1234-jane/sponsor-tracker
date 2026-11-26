@@ -759,7 +759,7 @@ function cardHtml(it) {
       </div>
 
       <h3 class="card-title">${esc(it.title)}</h3>
-      ${it.offer ? `<p class="offer">🎁 ${esc(it.offer)}</p>` : ""}
+      ${it.offer ? `<p class="offer"><b>↳</b> ${esc(it.offer)}</p>` : ""}
 
       ${received || it.review_due || it.review_days ? `
       <dl class="meta">
