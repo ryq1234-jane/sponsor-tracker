@@ -2057,6 +2057,11 @@ dialog::backdrop {
   margin: 0;
 }
 
+.sec-title small {
+  font-weight: 400;
+  color: var(--muted);
+}
+
 .sec-hint {
   margin: -4px 0 10px;
   line-height: 1.5;

@@ -282,19 +282,21 @@
               <input type="date" name="reviewed_date">
             </label>
           </div>
-          <p class="hint sec-hint">마감일은 수령일과 "며칠 이내"로 자동 계산돼요(직접 입력도 가능). 완료일은 "리뷰 작성"을 체크하면 오늘로 들어가고, 월별 정산의 기준이 돼요.</p>
+          <p class="hint sec-hint">마감일은 수령일과 "며칠 이내"로 자동 계산돼요(직접 입력도 가능). 완료일은 게시물을 모두 체크하면 오늘로 들어가고, 월별 정산의 기준이 돼요.</p>
         </section>
 
-        <!-- 5. 리뷰 작성 + 게시물 체크리스트 -->
+        <!-- 5. 리뷰 게시물 체크리스트 (제목은 누를 수 없음 — 리뷰 완료는 게시물이 모두 체크되면 자동) -->
         <section class="form-sec">
+          <input type="checkbox" name="reviewed" hidden>
           <div class="sec-head">
-            <label class="pill"><input type="checkbox" name="reviewed"> 리뷰 작성 <small id="reviewProgress"></small></label>
+            <h3 class="sec-title">리뷰 게시물 <small id="reviewProgress"></small></h3>
             <div class="stepper" title="게시물 개수">
               <button type="button" id="postMinus" aria-label="게시물 줄이기">−</button>
               <output id="postCount">1</output>
               <button type="button" id="postPlus" aria-label="게시물 늘리기">+</button>
             </div>
           </div>
+          <p class="hint sec-hint">올릴 게시물을 미리 적어 두고, 다 올린 게시물만 체크하세요. 모두 체크하면 리뷰 완료가 돼요.</p>
           <div id="postsList" class="posts-edit"></div> <!-- script에서 채움 -->
         </section>
 
