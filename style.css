@@ -241,18 +241,6 @@ button {
   text-align: left;
 }
 
-/* 회원가입 화면의 개인정보 안내 */
-.privacy-note {
-  margin: 0 0 14px;
-  padding: 10px 12px;
-  font-size: 0.8rem;
-  line-height: 1.55;
-  color: var(--muted);
-  background: var(--subtle);
-  border-radius: 8px;
-  word-break: keep-all;
-}
-
 .auth-links {
   display: flex;
   flex-direction: column;
