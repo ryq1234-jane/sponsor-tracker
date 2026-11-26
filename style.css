@@ -626,6 +626,15 @@ button {
 
 /* 휴대폰: 칸이 좁으니 여백을 줄이고, 금액·"보기 ↗"는 들여쓰기 없이 */
 @media (max-width: 560px) {
+  /* 휴대폰: 선정·수령 칸은 조금 좁게, 협찬(제품 제공 ▾)·리뷰 칸은 넓게 → 화살표가 글자 오른쪽 같은 줄에 */
+  .checks-row {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 0.8fr) minmax(0, 1.1fr);
+  }
+
+  .review-chip {
+    white-space: nowrap;
+  }
+
   .post-list {
     gap: 5px;
     padding: 8px 6px;
