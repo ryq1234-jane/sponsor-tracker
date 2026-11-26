@@ -143,3 +143,45 @@ create policy "본인 프로필만 수정" on public.profiles
 
 grant select, insert, update on public.profiles to authenticated;
 revoke all on public.profiles from anon;
+
+-- 초대 코드: 코드가 있어야 가입 가능 (이벤트용 — 횟수·기간 제한)
+-- 표는 아무도 직접 읽을 수 없음 (정책 없음 + RLS). 코드 발행·확인은 SQL Editor에서만.
+create table if not exists public.invite_codes (
+  code        text primary key check (code = upper(code)),
+  max_uses    int  not null default 1 check (max_uses > 0),
+  used_count  int  not null default 0,
+  expires_at  timestamptz,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.invite_codes enable row level security;
+revoke all on public.invite_codes from anon, authenticated;
+
+-- 가입(auth.users 추가) 직전에 코드 확인: 틀리거나, 다 썼거나, 기간이 지나면 가입 거절
+create or replace function public.check_invite_code()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_code text := upper(trim(coalesce(new.raw_user_meta_data ->> 'invite_code', '')));
+  v_ok   int;
+begin
+  update public.invite_codes
+     set used_count = used_count + 1
+   where code = v_code
+     and used_count < max_uses
+     and (expires_at is null or expires_at > now());
+  get diagnostics v_ok = row_count;
+  if v_ok = 0 then
+    raise exception 'INVALID_INVITE_CODE';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists check_invite_code on auth.users;
+create trigger check_invite_code
+  before insert on auth.users
+  for each row execute function public.check_invite_code();

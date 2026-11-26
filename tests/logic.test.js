@@ -164,6 +164,7 @@ eq("메일 링크 주소(#access_token...)는 로그인으로", t.authScreenFrom
 eq("#reset 은 직접 못 들어감", t.authScreenFromHash("#reset"), "login");
 
 // 오류 문구
+eq("초대 코드 거절", t.friendlyError({ message: "Database error saving new user" }), "초대 코드가 올바르지 않거나 마감됐어요. 안내받은 코드를 다시 확인해 주세요.");
 eq("로그인 실패", t.friendlyError({ message: "Invalid login credentials" }), "이메일 또는 비밀번호가 맞지 않아요.");
 eq("같은 비밀번호로 변경", t.friendlyError({ message: "New password should be different from the old password." }), "지금 쓰는 비밀번호와 다른 비밀번호를 입력해 주세요.");
 eq("메일 너무 자주 요청", t.friendlyError({ message: "For security purposes, you can only request this after 42 seconds." }), "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.");

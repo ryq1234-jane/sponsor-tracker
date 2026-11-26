@@ -130,6 +130,10 @@ function friendlyError(error) {
   if (/sponsorships/i.test(msg) && /(does not exist|schema cache)/i.test(msg)) {
     return "데이터베이스 표가 아직 없어요. supabase.sql 을 먼저 실행해 주세요.";
   }
+  // 초대 코드가 틀리거나 마감되면 Supabase가 가입을 거절함 (supabase.sql 의 check_invite_code)
+  if (/INVALID_INVITE_CODE|Database error saving new user/i.test(msg)) {
+    return "초대 코드가 올바르지 않거나 마감됐어요. 안내받은 코드를 다시 확인해 주세요.";
+  }
   if (/Failed to fetch/i.test(msg)) return "인터넷 연결을 확인해 주세요.";
   return msg;
 }
@@ -283,7 +287,8 @@ onAuthSubmit(signupForm, async (f) => {
   const { data, error } = await db.auth.signUp({
     email: f.email.value.trim(),
     password: f.password.value,
-    options: { emailRedirectTo: siteUrl() },
+    // 초대 코드는 Supabase가 가입 직전에 직접 확인 (화면에서만 막으면 우회할 수 있어서)
+    options: { emailRedirectTo: siteUrl(), data: { invite_code: f.invite.value.trim().toUpperCase() } },
   });
   if (error) throw error;
   if (!data.session) {
