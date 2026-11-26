@@ -938,84 +938,6 @@ dialog::backdrop {
   flex: 1;
 }
 
-.checks {
-  gap: 12px;
-  padding: 10px 12px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.checks legend {
-  padding: 0 4px;
-}
-
-.checks-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-}
-
-.checks label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-weight: 400;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
-.checks label input[type="checkbox"],
-.checks label input[type="radio"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--primary);
-}
-
-/* 리뷰 작성 + 그 아래 게시물 체크리스트 (들여쓰기 + 왼쪽 선으로 "하위 메뉴" 표시) */
-.review-block {
-  padding-top: 10px;
-  border-top: 1px dashed var(--line);
-}
-
-.review-block .posts-head {
-  margin-bottom: 8px;
-}
-
-.review-block small {
-  color: var(--muted);
-}
-
-/* 신청 + 그 아래 신청 종류 (리뷰-게시물과 같은 하위 메뉴 모양) */
-.apply-block {
-  margin-bottom: 10px;
-}
-
-.sub-menu {
-  display: grid;
-  gap: 10px;
-  margin: 8px 0 0 8px;
-  padding-left: 14px;
-  border-left: 2px solid var(--line);
-}
-
-.sub-checks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-}
-
-/* 첫 줄(경로)과 둘째 줄(종류) 사이 옅은 구분선 */
-.sub-checks + .sub-checks {
-  padding-top: 10px;
-  border-top: 1px dashed var(--line);
-}
-
-.apply-type {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 /* 유가 협찬 옆 금액 입력칸 */
 .amount-input {
   display: flex;
@@ -1024,9 +946,8 @@ dialog::backdrop {
   font-size: 0.95rem;
 }
 
-.field .amount-input input {
-  width: 130px;
-  padding: 6px 10px;
+.amount-input input {
+  width: 150px;
   text-align: right;
 }
 
@@ -1037,11 +958,7 @@ dialog::backdrop {
   color: var(--text);
 }
 
-.review-block .posts-edit {
-  margin-left: 8px;
-  padding-left: 14px;
-  border-left: 2px solid var(--line);
-}
+
 
 .confirm {
   width: min(380px, calc(100% - 32px));
@@ -1921,14 +1838,7 @@ dialog::backdrop {
   color: #30AFFF;
 }
 
-/* 수정 창: 유가 협찬 금액 옆 "입금 완료" */
-.apply-type {
-  flex-wrap: wrap;
-}
 
-.deposit-check {
-  font-size: 0.9rem;
-}
 
 /* ===== 월별 정산 창 ===== */
 .settle-dialog[open] {
@@ -2110,4 +2020,155 @@ dialog::backdrop {
   font-size: 0.9rem;
   color: var(--muted);
   text-align: center;
+}
+
+/* ===== 추가/수정 창: 구역별로 정리 (겹친 상자·세로선 없이 제목 + 얇은 구분선) ===== */
+.edit-body {
+  padding-top: 4px;
+}
+
+.form-sec {
+  padding: 16px 0 6px;
+  border-top: 1px solid var(--line);
+}
+
+.form-sec:first-child {
+  padding-top: 8px;
+  border-top: none;
+}
+
+.sec-title {
+  margin: 0 0 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--soft-text);
+}
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sec-head .sec-title {
+  margin: 0;
+}
+
+.sec-hint {
+  margin: -4px 0 10px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+/* 입력칸: 테두리 대신 옅은 회색 바탕 (눌렀을 때만 진한 테두리) */
+.edit-body input[type="text"],
+.edit-body input[type="url"],
+.edit-body input[type="date"],
+.edit-body input[type="number"],
+.edit-body textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  font-size: 16px; /* 아이폰에서 입력할 때 확대되지 않게 */
+  font-weight: 400;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.edit-body input:focus,
+.edit-body textarea:focus {
+  outline: none;
+  background: var(--card);
+  border-color: var(--primary);
+}
+
+.edit-body .field {
+  margin-bottom: 12px;
+}
+
+.edit-body .field > span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* 한 줄: [작은 이름] [내용] */
+.form-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.row-label {
+  flex-shrink: 0;
+  width: 40px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* 체크박스·라디오를 알약 모양 버튼으로 (체크하면 연두 바탕) */
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.form-sec > .pill-row {
+  margin-bottom: 12px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px 7px 10px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text);
+  background: var(--bg);
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pill input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--primary);
+}
+
+.pill:has(input:checked) {
+  background: var(--chip-on);
+}
+
+.pill small {
+  color: var(--muted);
+}
+
+/* 게시물 줄 */
+.posts-edit .post-row input[type="checkbox"] {
+  margin: 0 2px;
+}
+
+@media (max-width: 560px) {
+  .grid-2 {
+    gap: 0 8px;
+  }
+
+  .amount-input {
+    flex: 1;
+  }
+
+  .amount-input input {
+    width: 100%;
+  }
 }

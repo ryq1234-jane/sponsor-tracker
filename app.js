@@ -1397,15 +1397,7 @@ postsList.addEventListener("change", (e) => {
 // ----- 신청 종류 (창 안) -----
 const applyTypesBox = $("applyTypes");
 applyTypesBox.innerHTML = APPLY_TYPES.map((type) => `
-  <span class="apply-type">
-    <label><input type="checkbox" data-apply-type="${type}"> ${type}</label>
-    ${type === PAID_TYPE ? `
-    <span class="amount-input">
-      <input type="text" id="paidAmount" inputmode="numeric" autocomplete="off" placeholder="금액" aria-label="유가 협찬 금액 (원)">
-      <span>원</span>
-    </span>
-    <label class="deposit-check"><input type="checkbox" id="deposited"> 입금 완료</label>` : ""}
-  </span>`).join("");
+  <label class="pill"><input type="checkbox" data-apply-type="${type}"> ${type}</label>`).join("");
 const applyTypeInputs = () => [...applyTypesBox.querySelectorAll("[data-apply-type]")];
 const paidAmount = $("paidAmount");
 const paidCheckbox = () => applyTypeInputs().find((cb) => cb.dataset.applyType === PAID_TYPE);
@@ -1421,11 +1413,13 @@ applyTypesBox.addEventListener("change", (e) => {
   if (e.target.dataset.applyType !== undefined && e.target.checked) checkApplied();
   // 유가 협찬을 해제하면 입금 완료도 해제
   if (e.target.dataset.applyType === PAID_TYPE && !e.target.checked) depositedInput.checked = false;
-  // 입금 완료를 체크하면 유가 협찬·협찬도 자동 체크
-  if (e.target === depositedInput && e.target.checked) {
-    paidCheckbox().checked = true;
-    checkApplied();
-  }
+});
+
+// 입금 완료를 체크하면 유가 협찬·협찬도 자동 체크
+depositedInput.addEventListener("change", () => {
+  if (!depositedInput.checked) return;
+  paidCheckbox().checked = true;
+  checkApplied();
 });
 
 // 경로(직접 신청 / 제안 받음)를 고르면 "협찬"도 자동 체크

@@ -201,93 +201,111 @@
         <button type="button" class="icon-btn" id="editClose" aria-label="닫기">✕</button>
       </header>
 
-      <div class="dialog-body">
-        <label class="field">
-          <span>브랜드 / 캠페인 이름 *</span>
-          <input type="text" name="title" required placeholder="예: OO리빙 무드등 체험단">
-        </label>
-
-        <div class="grid-2">
+      <div class="dialog-body edit-body">
+        <!-- 1. 기본 정보 -->
+        <section class="form-sec">
+          <h3 class="sec-title">기본 정보</h3>
           <label class="field">
-            <span>모집처</span>
-            <input type="text" name="platform" placeholder="예: 레뷰, 브랜드 DM" list="platformList">
-            <datalist id="platformList"></datalist>
+            <span>브랜드 / 캠페인 이름 *</span>
+            <input type="text" name="title" required placeholder="예: OO리빙 무드등 체험단">
           </label>
+          <div class="grid-2">
+            <label class="field">
+              <span>모집처</span>
+              <input type="text" name="platform" placeholder="예: 레뷰, 브랜드 DM" list="platformList">
+              <datalist id="platformList"></datalist>
+            </label>
+            <label class="field">
+              <span>제공 내용</span>
+              <input type="text" name="offer" placeholder="예: 패브릭 쿠션 2개 (6만원)">
+            </label>
+          </div>
           <label class="field">
-            <span>제공 내용</span>
-            <input type="text" name="offer" placeholder="예: 패브릭 쿠션 2개 (6만원)">
+            <span>모집 글 URL</span>
+            <input type="url" name="recruit_url" placeholder="https://">
           </label>
-        </div>
+        </section>
 
-        <fieldset class="field checks">
-          <legend>진행 체크</legend>
-          <!-- 협찬 + 그 아래 하위 메뉴: 경로(직접 신청 / 제안 받음), 종류(제품 제공 / 유가 협찬) -->
-          <div class="apply-block">
-            <label><input type="checkbox" name="applied"> 협찬</label>
-            <div class="sub-menu">
-              <div class="sub-checks">
-                <label><input type="radio" name="origin" value="applied"> 직접 신청</label>
-                <label><input type="radio" name="origin" value="offered"> 제안 받음</label>
-              </div>
-              <div id="applyTypes" class="sub-checks"></div> <!-- script에서 채움 -->
+        <!-- 2. 진행 상황 (단계 체크) -->
+        <section class="form-sec">
+          <h3 class="sec-title">진행 상황</h3>
+          <div class="pill-row">
+            <label class="pill"><input type="checkbox" name="applied"> 협찬</label>
+            <label class="pill"><input type="checkbox" name="selected"> 선정</label>
+            <label class="pill"><input type="checkbox" name="rejected"> 미선정</label>
+            <label class="pill"><input type="checkbox" name="received"> 택배 수령</label>
+          </div>
+        </section>
+
+        <!-- 3. 협찬 조건: 경로 / 종류 / 금액·입금 -->
+        <section class="form-sec">
+          <h3 class="sec-title">협찬 조건</h3>
+          <div class="form-row">
+            <span class="row-label">경로</span>
+            <div class="pill-row">
+              <label class="pill"><input type="radio" name="origin" value="applied"> 직접 신청</label>
+              <label class="pill"><input type="radio" name="origin" value="offered"> 제안 받음</label>
             </div>
           </div>
-
-          <div class="checks-line">
-            <label><input type="checkbox" name="selected"> 선정</label>
-            <label><input type="checkbox" name="rejected"> 미선정</label>
-            <label><input type="checkbox" name="received"> 택배 수령</label>
+          <div class="form-row">
+            <span class="row-label">종류</span>
+            <div id="applyTypes" class="pill-row"></div> <!-- script에서 채움 -->
           </div>
+          <div class="form-row">
+            <span class="row-label">금액</span>
+            <span class="amount-input">
+              <input type="text" id="paidAmount" inputmode="numeric" autocomplete="off" placeholder="유가 협찬 금액" aria-label="유가 협찬 금액 (원)">
+              <span>원</span>
+            </span>
+            <label class="pill"><input type="checkbox" id="deposited"> 입금 완료</label>
+          </div>
+        </section>
 
-          <!-- 리뷰 작성 + 그 아래 게시물 체크리스트 -->
-          <div class="review-block">
-            <div class="posts-head">
-              <label><input type="checkbox" name="reviewed"> 리뷰 작성 <small id="reviewProgress"></small></label>
-              <div class="stepper" title="게시물 개수">
-                <button type="button" id="postMinus" aria-label="게시물 줄이기">−</button>
-                <output id="postCount">1</output>
-                <button type="button" id="postPlus" aria-label="게시물 늘리기">+</button>
-              </div>
+        <!-- 4. 일정 -->
+        <section class="form-sec">
+          <h3 class="sec-title">일정</h3>
+          <div class="grid-2">
+            <label class="field">
+              <span>수령일</span>
+              <input type="date" name="received_date">
+            </label>
+            <label class="field">
+              <span>수령 후 며칠 이내 리뷰</span>
+              <input type="number" name="review_days" min="1" max="90" inputmode="numeric" placeholder="예: 7">
+            </label>
+            <label class="field">
+              <span>리뷰 마감일</span>
+              <input type="date" name="review_due">
+            </label>
+            <label class="field">
+              <span>리뷰 완료일</span>
+              <input type="date" name="reviewed_date">
+            </label>
+          </div>
+          <p class="hint sec-hint">마감일은 수령일과 "며칠 이내"로 자동 계산돼요(직접 입력도 가능). 완료일은 "리뷰 작성"을 체크하면 오늘로 들어가고, 월별 정산의 기준이 돼요.</p>
+        </section>
+
+        <!-- 5. 리뷰 작성 + 게시물 체크리스트 -->
+        <section class="form-sec">
+          <div class="sec-head">
+            <label class="pill"><input type="checkbox" name="reviewed"> 리뷰 작성 <small id="reviewProgress"></small></label>
+            <div class="stepper" title="게시물 개수">
+              <button type="button" id="postMinus" aria-label="게시물 줄이기">−</button>
+              <output id="postCount">1</output>
+              <button type="button" id="postPlus" aria-label="게시물 늘리기">+</button>
             </div>
-            <div id="postsList" class="posts-edit"></div> <!-- script에서 채움 -->
           </div>
-        </fieldset>
+          <div id="postsList" class="posts-edit"></div> <!-- script에서 채움 -->
+        </section>
 
-        <div class="grid-2">
-          <label class="field">
-            <span>수령일</span>
-            <input type="date" name="received_date">
-          </label>
-          <label class="field">
-            <span>수령 후 며칠 이내 리뷰</span>
-            <input type="number" name="review_days" min="1" max="90" inputmode="numeric" placeholder="예: 7">
-          </label>
-        </div>
-
-        <label class="field">
-          <span>리뷰 마감일</span>
-          <input type="date" name="review_due">
-          <small class="hint">수령일과 "며칠 이내"를 넣으면 자동으로 계산돼요. 날짜가 정해진 캠페인은 직접 입력하세요.</small>
-        </label>
-
-        <label class="field">
-          <span>리뷰 완료일</span>
-          <input type="date" name="reviewed_date">
-          <small class="hint">"리뷰 작성"을 체크하면 오늘 날짜가 들어가요. 월별 정산은 이 날짜의 달로 계산돼요.</small>
-        </label>
-
-        <label class="field">
-          <span>모집 글 URL</span>
-          <input type="url" name="recruit_url" placeholder="https://">
-        </label>
-
-        <div class="field">
-          <div class="posts-head">
-            <span>메모</span>
+        <!-- 6. 메모 -->
+        <section class="form-sec">
+          <div class="sec-head">
+            <h3 class="sec-title">메모</h3>
             <button type="button" class="btn btn-ghost btn-small" id="memoAdd">+ 메모 추가</button>
           </div>
           <div id="memosList" class="memos-edit"></div> <!-- script에서 채움 -->
-        </div>
+        </section>
 
         <p id="editMessage" class="message" hidden></p>
       </div>
