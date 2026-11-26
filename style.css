@@ -1168,10 +1168,10 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* 숫자 위치는 늘 같게, 일정 바는 그 아래로 쌓임 */
   gap: 3px;
-  height: 42px;
-  padding: 0;
+  min-height: 42px;            /* 일정이 3개 이상일 때만 칸(그 주 줄)이 세로로 늘어남 */
+  padding: 7px 0 5px;
   font-size: 0.85rem;
   color: var(--text);
   background: none;
@@ -1212,17 +1212,37 @@ dialog::backdrop {
   color: var(--on-primary);
 }
 
+/* 일정 표시: 점 대신 가로로 긴 바를 세로로 쌓기 (최대 3개, 넘으면 아래에 +N) */
 .cal-dots {
   display: flex;
-  gap: 3px;
-  height: 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
 }
 
-.cal-dots i,
+.cal-dots i {
+  width: 62%;
+  max-width: 28px;
+  height: 4px;
+  border-radius: 2px;
+}
+
 .cal-legend i {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.cal-more {
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.cal-day.selected .cal-more {
+  color: var(--on-primary);
 }
 
 /* 리뷰 마감 색: 마감(파랑) · 3일 내(주황) · 지남(빨강) · 끝난 것(회색) */
@@ -1352,7 +1372,8 @@ dialog::backdrop {
 }
 
 .cal-dialog .cal-day {
-  height: 46px;
+  min-height: 46px;
+  padding-top: 9px;
   font-size: 0.95rem;
 }
 

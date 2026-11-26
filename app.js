@@ -924,7 +924,8 @@ function calendarHtml(list, year, month, selected, withSummary = false) {
     days += `
       <button type="button" class="${cls}" data-cal-date="${date}"${holiday ? ` title="${holiday}"` : ""} aria-label="${m}월 ${d}일${holiday ? ` ${holiday}` : ""}${evs.length ? `, 일정 ${evs.length}개` : ""}">
         <span class="num">${d}</span>
-        <span class="cal-dots">${evs.slice(0, 3).map((ev) => `<i class="${eventClass(ev)}"></i>`).join("")}</span>
+        ${evs.length ? `<span class="cal-dots">${evs.slice(0, 3).map((ev) => `<i class="${eventClass(ev)}"></i>`).join("")}</span>` : ""}
+        ${evs.length > 3 ? `<span class="cal-more">+${evs.length - 3}</span>` : ""}
       </button>`;
   }
 
